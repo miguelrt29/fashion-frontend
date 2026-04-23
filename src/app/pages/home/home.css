@@ -1,0 +1,535 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #000;
+  background: #fff;
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 48px 48px 24px;
+}
+
+.section-header h2 {
+  font-size: 13px;
+  font-weight: 400;
+  color: #000;
+  letter-spacing: 1px;
+}
+
+.see-all {
+  font-size: 12px;
+  color: #000;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.see-all:hover {
+  opacity: 1;
+}
+
+/* NAV BANNER */
+.nav-banner {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+/* HERO */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 700px;
+  max-height: 900px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 80px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-label {
+  display: inline-block;
+  font-size: 11px;
+  color: #fff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.hero h1 {
+  font-size: 64px;
+  font-weight: 300;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  letter-spacing: -2px;
+}
+
+.hero p {
+  font-size: 16px;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 32px;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: #fff;
+  color: #000;
+  padding: 16px 32px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* CATEGORIES */
+.categories {
+  background: #fff;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 48px 48px;
+}
+
+.category-card {
+  display: block;
+  cursor: pointer;
+}
+
+.category-img {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.category-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.category-card:hover .category-img img {
+  transform: scale(1.05);
+}
+
+.category-info {
+  padding: 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-name {
+  font-size: 13px;
+  font-weight: 400;
+  color: #000;
+  letter-spacing: 0.5px;
+}
+
+.category-cta {
+  font-size: 11px;
+  color: #999;
+  letter-spacing: 0.5px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+}
+
+.category-card:hover .category-cta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* FEATURED PRODUCTS */
+.featured {
+  background: #ffffff;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  padding: 0 48px 48px;
+  background: #ffffff;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.products-grid app-product-card {
+  background: #ffffff;
+}
+
+.loading {
+  text-align: center;
+  padding: 80px;
+  color: #999;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* PROMO SECTION */
+.promo-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 600px;
+}
+
+.promo-image {
+  overflow: hidden;
+}
+
+.promo-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promo-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 80px;
+  background: #f5f5f5;
+}
+
+.promo-label {
+  font-size: 10px;
+  color: #666;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+
+.promo-content h2 {
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+  color: #000;
+}
+
+.promo-content p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.btn-secondary {
+  display: inline-block;
+  background: #000;
+  color: #fff;
+  padding: 16px 32px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #333;
+}
+
+/* NEWSLETTER */
+.newsletter {
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  padding: 64px 0;
+}
+
+.newsletter-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  padding: 0 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.newsletter-left h3 {
+  font-size: 13px;
+  font-weight: 400;
+  color: #000;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.newsletter-left p {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+.newsletter-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.newsletter-form {
+  display: flex;
+  border-bottom: 1px solid #000;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: #000;
+  outline: none;
+}
+
+.newsletter-form input::placeholder {
+  color: #999;
+}
+
+.newsletter-form button {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: 500;
+  color: #000;
+  letter-spacing: 1px;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.newsletter-form button:hover {
+  opacity: 0.6;
+}
+
+.newsletter-note {
+  font-size: 10px;
+  color: #999;
+  line-height: 1.5;
+}
+
+/* TRUST SECTION */
+.trust-section {
+  background: #f5f5f5;
+  padding: 48px 0;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: 0 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.trust-item {
+  text-align: center;
+  padding: 24px;
+}
+
+.trust-icon {
+  font-size: 24px;
+  margin-bottom: 16px;
+  display: block;
+  color: #000;
+}
+
+.trust-item h4 {
+  font-size: 12px;
+  font-weight: 500;
+  color: #000;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.trust-item p {
+  font-size: 11px;
+  color: #999;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 32px;
+  }
+
+  .section-header {
+    padding: 40px 32px 20px;
+  }
+
+  .hero-content {
+    padding: 60px 32px;
+  }
+
+  .hero h1 {
+    font-size: 48px;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 0 32px 40px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 0 32px 40px;
+  }
+
+  .promo-section {
+    grid-template-columns: 1fr;
+  }
+
+  .promo-image {
+    height: 400px;
+  }
+
+  .promo-content {
+    padding: 48px 32px;
+  }
+
+  .newsletter-inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 0 32px;
+  }
+
+  .trust-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .section-header {
+    padding: 32px 16px 16px;
+  }
+
+  .hero {
+    height: 70vh;
+    min-height: 400px;
+  }
+
+  .hero-content {
+    padding: 40px 16px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 16px 32px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 16px 32px;
+  }
+
+  .promo-image {
+    height: 300px;
+  }
+
+  .promo-content {
+    padding: 40px 16px;
+  }
+
+  .promo-content h2 {
+    font-size: 32px;
+  }
+
+  .newsletter {
+    padding: 48px 0;
+  }
+
+  .newsletter-inner {
+    padding: 0 16px;
+  }
+
+  .trust-grid {
+    grid-template-columns: 1fr 1fr;
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .trust-item {
+    padding: 16px 8px;
+  }
+}

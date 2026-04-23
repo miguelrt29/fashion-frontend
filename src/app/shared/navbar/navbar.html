@@ -1,0 +1,44 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <a routerLink="/" class="navbar-logo">
+      Fashion<span>Store</span>
+    </a>
+
+    <!-- Links centro -->
+    <ul class="navbar-links" [class.open]="menuOpen">
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a></li>
+      <li><a routerLink="/products" routerLinkActive="active">Productos</a></li>
+      <li *ngIf="isLoggedIn"><a routerLink="/profile" routerLinkActive="active">Mi perfil</a></li>
+    </ul>
+
+    <!-- Acciones derecha -->
+    <div class="navbar-actions">
+      <!-- Carrito -->
+      <a routerLink="/cart" class="cart-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h13M10 19a1 1 0 100 2 1 1 0 000-2zm7 0a1 1 0 100 2 1 1 0 000-2z"/>
+        </svg>
+        <span class="cart-count" *ngIf="cartCount > 0">{{ cartCount }}</span>
+      </a>
+
+      <!-- Auth -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" class="btn-outline">Iniciar sesión</a>
+        <a routerLink="/register" class="btn-primary">Registrarse</a>
+      </ng-container>
+
+      <ng-container *ngIf="isLoggedIn">
+        <span class="user-name">Hola, {{ user?.firstName }}</span>
+        <button (click)="logout()" class="btn-outline">Salir</button>
+      </ng-container>
+
+      <!-- Menú móvil -->
+      <button class="menu-toggle" (click)="toggleMenu()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>

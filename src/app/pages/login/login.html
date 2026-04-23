@@ -1,0 +1,33 @@
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <a routerLink="/" class="auth-logo">Fashion<span>Store</span></a>
+      <p>La moda que te define, al alcance de tus manos.</p>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-container">
+      <h1>Iniciar sesión</h1>
+      <p class="auth-subtitle">¿No tienes cuenta? <a routerLink="/register">Regístrate gratis</a></p>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" [(ngModel)]="email" name="email" placeholder="tu@email.com" autocomplete="email"/>
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" autocomplete="current-password"/>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          {{ loading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

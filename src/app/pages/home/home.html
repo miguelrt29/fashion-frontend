@@ -1,0 +1,131 @@
+<!-- Nav Banner -->
+<section class="nav-banner">
+  <span>ENVÍO GRATIS en pedidos +$150.000 · Devoluciones gratuitas en 30 días</span>
+</section>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=1920&q=85" alt="FashionStore">
+  </div>
+  <div class="hero-content">
+    <span class="hero-label">NUEVA COLECCIÓN</span>
+    <h1>Moda Atemporal</h1>
+    <p>Las piezas esenciales de la temporada.</p>
+    <div class="hero-actions">
+      <a routerLink="/products" class="btn-primary">VER TODO</a>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="categories">
+  <div class="container">
+    <div class="section-header">
+      <h2>CATEGORÍAS</h2>
+    </div>
+<div class="categories-grid">
+      <a routerLink="/products" [queryParams]="{category: 'women\'s clothing'}" class="category-card">
+        <div class="category-img">
+          <img src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=600&q=80" alt="Mujer">
+        </div>
+        <div class="category-info">
+          <span class="category-name">Mujer</span>
+          <span class="category-cta">Ver producto →</span>
+        </div>
+      </a>
+      <a routerLink="/products" [queryParams]="{category: 'men\'s clothing'}" class="category-card">
+        <div class="category-img">
+          <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80" alt="Hombre">
+        </div>
+        <div class="category-info">
+          <span class="category-name">Hombre</span>
+          <span class="category-cta">Ver producto →</span>
+        </div>
+      </a>
+      <a routerLink="/products" [queryParams]="{category: 'jewelery'}" class="category-card">
+        <div class="category-img">
+          <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80" alt="Joyería">
+        </div>
+        <div class="category-info">
+          <span class="category-name">Joyería</span>
+          <span class="category-cta">Ver producto →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Products -->
+<section class="featured">
+  <div class="container">
+    <div class="section-header">
+      <h2>DESTACADOS</h2>
+      <a routerLink="/products" class="see-all">Ver todo →</a>
+    </div>
+    <div class="products-grid" *ngIf="!loading">
+      <app-product-card *ngFor="let product of featuredProducts" [product]="product"></app-product-card>
+    </div>
+    <div class="loading" *ngIf="loading">CARGANDO...</div>
+  </div>
+</section>
+
+<!-- Promo Section -->
+<section class="promo-section">
+  <div class="promo-image">
+    <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&q=80" alt="Promo">
+  </div>
+  <div class="promo-content">
+    <span class="promo-label">EXCLUSIVO ONLINE</span>
+    <h2>Hasta 50% Descuento</h2>
+    <p>En selección de prendas de temporada. Hasta agotar existencias.</p>
+    <a routerLink="/products" class="btn-secondary">DESCUBRIR AHORA</a>
+  </div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter">
+  <div class="container">
+    <div class="newsletter-inner">
+      <div class="newsletter-left">
+        <h3>MANTENTE AL DÍA</h3>
+        <p>Suscríbete para recibir información sobre nuevas colecciones, ofertas exclusivas y contenido exclusivo.</p>
+      </div>
+      <div class="newsletter-right">
+        <form (ngSubmit)="onNewsletter()" class="newsletter-form">
+          <input type="email" [(ngModel)]="newsletterEmail" name="email" placeholder="Correo electrónico" required>
+          <button type="submit">SUSCRIBIRSE</button>
+        </form>
+        <span class="newsletter-note">Al suscribirte, aceptas recibir comunicaciones comerciales. Puedes darte de baja en cualquier momento.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Badges -->
+<section class="trust-section">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <span class="trust-icon">⟳</span>
+        <h4>Envío Gratuito</h4>
+        <p>En pedidos superiores a $150.000</p>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">↩</span>
+        <h4>Devolución Gratuita</h4>
+        <p>30 días para cambiar de opinión</p>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">◇</span>
+        <h4>Pago Seguro</h4>
+        <p>100% protegido</p>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">♢</span>
+        <h4>Atención al Cliente</h4>
+        <p>24/7 Disponible</p>
+      </div>
+    </div>
+  </div>
+</section>

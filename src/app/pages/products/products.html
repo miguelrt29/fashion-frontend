@@ -1,0 +1,56 @@
+<div class="products-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-container">
+      <h1>{{ selectedCategory ? selectedCategory : 'Todos los productos' }}</h1>
+      <span class="product-count">{{ products.length }} productos</span>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <!-- Filtros -->
+    <aside class="filters">
+      <div class="filter-section">
+        <h3>Categorías</h3>
+        <ul class="category-list">
+          <li *ngFor="let cat of categories">
+            <button
+              (click)="selectCategory(cat.slug)"
+              [class.active]="selectedCategory === cat.slug">
+              {{ cat.name }}
+            </button>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Productos -->
+    <div class="products-main">
+      <!-- Búsqueda -->
+      <div class="search-bar">
+        <input
+          type="text"
+          [(ngModel)]="search"
+          (keyup.enter)="onSearch()"
+          placeholder="Buscar productos..."/>
+        <button (click)="onSearch()">Buscar</button>
+      </div>
+
+      <!-- Grid -->
+      <div class="products-grid" *ngIf="!loading && products.length > 0">
+        <app-product-card *ngFor="let product of products" [product]="product"></app-product-card>
+      </div>
+
+      <!-- Sin resultados -->
+      <div class="empty-state" *ngIf="!loading && products.length === 0">
+        <p>No se encontraron productos</p>
+        <button (click)="selectedCategory = ''; search = ''; loadProducts()">Ver todos</button>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" *ngIf="loading">
+        <p>Cargando productos...</p>
+      </div>
+    </div>
+  </div>
+</div>

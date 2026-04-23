@@ -1,0 +1,23 @@
+<div class="product-card">
+  <a [routerLink]="['/products', product.id]" class="product-image">
+    <img *ngIf="product.images?.[0]" [src]="product.images[0]" [alt]="product.name">
+    <div *ngIf="!product.images?.[0]" class="image-placeholder">👕</div>
+    <span *ngIf="product.discount > 0" class="discount-badge">-{{ product.discount }}%</span>
+  </a>
+  <div class="product-info">
+    <span class="product-category">{{ product.category }}</span>
+    <a [routerLink]="['/products', product.id]" class="product-name">{{ product.name }}</a>
+    <span class="product-brand">{{ product.brand }}</span>
+    <div class="product-footer">
+      <span class="product-price">${{ product.price | number:'1.0-0' }}</span>
+      <button (click)="addToCart()" class="add-to-cart">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+      </button>
+    </div>
+    <div class="product-sizes" *ngIf="product.sizes?.length">
+      <span *ngFor="let size of product.sizes" class="size-tag">{{ size }}</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,81 @@
+<div class="detail-page" *ngIf="!loading && product">
+  <div class="breadcrumb">
+    <a routerLink="/">Inicio</a>
+    <span>/</span>
+    <a routerLink="/products">Productos</a>
+    <span>/</span>
+    <span>{{ product.name }}</span>
+  </div>
+
+  <div class="detail-container">
+    <!-- Imagen -->
+    <div class="detail-images">
+      <div class="main-image">
+        <img *ngIf="product.images?.[0]" [src]="product.images[0]" [alt]="product.name">
+        <div *ngIf="!product.images?.[0]" class="image-placeholder">👕</div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="detail-info">
+      <span class="detail-category">{{ product.category }}</span>
+      <h1>{{ product.name }}</h1>
+      <span class="detail-brand">{{ product.brand }}</span>
+
+      <div class="detail-price">
+        <span class="price">${{ product.price | number:'1.0-0' }}</span>
+        <span class="discount" *ngIf="product.discount > 0">-{{ product.discount }}%</span>
+      </div>
+
+      <p class="detail-description">{{ product.description }}</p>
+
+      <!-- Tallas -->
+      <div class="option-group" *ngIf="product.sizes?.length">
+        <label>Talla — <span>{{ selectedSize }}</span></label>
+        <div class="size-options">
+          <button
+            *ngFor="let size of product.sizes"
+            (click)="selectedSize = size"
+            [class.selected]="selectedSize === size">
+            {{ size }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Colores -->
+      <div class="option-group" *ngIf="product.colors?.length">
+        <label>Color — <span>{{ selectedColor }}</span></label>
+        <div class="color-options">
+          <button
+            *ngFor="let color of product.colors"
+            (click)="selectedColor = color"
+            [class.selected]="selectedColor === color">
+            {{ color }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Cantidad -->
+      <div class="option-group">
+        <label>Cantidad</label>
+        <div class="quantity-selector">
+          <button (click)="decreaseQuantity()">−</button>
+          <span>{{ quantity }}</span>
+          <button (click)="increaseQuantity()">+</button>
+        </div>
+        <span class="stock-info">{{ product.stock }} disponibles</span>
+      </div>
+
+      <!-- Botón -->
+      <button class="btn-add-cart" (click)="addToCart()" [class.added]="added">
+        {{ added ? '✓ Añadido al carrito' : 'Añadir al carrito' }}
+      </button>
+
+      <a routerLink="/cart" class="btn-buy-now">Comprar ahora</a>
+    </div>
+  </div>
+</div>
+
+<div class="loading-state" *ngIf="loading">
+  <p>Cargando producto...</p>
+</div>

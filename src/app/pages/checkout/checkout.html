@@ -1,0 +1,195 @@
+<div class="checkout-page" *ngIf="!orderComplete">
+  <div class="checkout-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a routerLink="/">Inicio</a>
+      <span>/</span>
+      <a routerLink="/cart">Carrito</a>
+      <span>/</span>
+      <span>Pago</span>
+    </div>
+
+    <h1>Finalizar compra</h1>
+
+    <div class="checkout-content">
+      <!-- Formulario -->
+      <div class="checkout-form">
+        <!-- Datos de envío -->
+        <section class="form-section">
+          <h2>
+            <span class="section-number">1</span>
+            Datos de envío
+          </h2>
+
+          <!-- Dirección guardada -->
+          <div class="saved-address" *ngIf="savedAddresses.length > 0">
+            <label class="radio-option">
+              <input type="radio" name="addressType" [value]="'saved'" [(ngModel)]="addressType" (change)="onAddressTypeChange()">
+              <span class="radio-label">Usar dirección guardada</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="addressType" [value]="'new'" [(ngModel)]="addressType" (change)="onAddressTypeChange()">
+              <span class="radio-label">Nueva dirección</span>
+            </label>
+          </div>
+
+          <!-- Selector de direcciones guardadas -->
+          <div class="saved-address-list" *ngIf="addressType === 'saved' && savedAddresses.length > 0">
+            <div class="address-option" *ngFor="let addr of savedAddresses; let i = index">
+              <label>
+                <input type="radio" name="selectedAddress" [value]="i" [(ngModel)]="selectedAddressIndex">
+                <div class="address-details">
+                  <strong>{{ addr.type }}</strong>
+                  <p>{{ addr.street }}</p>
+                  <p>{{ addr.city }}, {{ addr.state }} {{ addr.zip }}</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Formulario nueva dirección -->
+          <div class="new-address-form" *ngIf="addressType === 'new' || savedAddresses.length === 0">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" [(ngModel)]="shipping.name" name="name" placeholder="Juan Pérez">
+              </div>
+              <div class="form-group">
+                <label>Teléfono</label>
+                <input type="tel" [(ngModel)]="shipping.phone" name="phone" placeholder="3001234567">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Dirección</label>
+              <input type="text" [(ngModel)]="shipping.street" name="street" placeholder="Calle 123 #45-67, Apartamento 301">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Ciudad</label>
+                <input type="text" [(ngModel)]="shipping.city" name="city" placeholder="Bogotá">
+              </div>
+              <div class="form-group">
+                <label>Departamento</label>
+                <input type="text" [(ngModel)]="shipping.state" name="state" placeholder="Cundinamarca">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Código postal</label>
+                <input type="text" [(ngModel)]="shipping.zip" name="zip" placeholder="110111">
+              </div>
+              <div class="form-group">
+                <label>País</label>
+                <input type="text" [(ngModel)]="shipping.country" name="country" placeholder="Colombia" value="Colombia" disabled>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Método de pago -->
+        <section class="form-section">
+          <h2>
+            <span class="section-number">2</span>
+            Método de pago
+          </h2>
+
+          <div class="payment-methods">
+            <label class="payment-option" [class.selected]="paymentMethod === 'cod'">
+              <input type="radio" name="paymentMethod" value="cod" [(ngModel)]="paymentMethod">
+              <div class="payment-info">
+                <span class="payment-name">Contra entrega</span>
+                <span class="payment-desc">Pagas cuando recibes el pedido</span>
+              </div>
+            </label>
+
+            <label class="payment-option" [class.selected]="paymentMethod === 'transfer'">
+              <input type="radio" name="paymentMethod" value="transfer" [(ngModel)]="paymentMethod">
+              <div class="payment-info">
+                <span class="payment-name">Transferencia bancaria</span>
+                <span class="payment-desc">BBVA: 1234 5678 9012 3456</span>
+              </div>
+            </label>
+
+            <label class="payment-option" [class.selected]="paymentMethod === 'card'">
+              <input type="radio" name="paymentMethod" value="card" [(ngModel)]="paymentMethod">
+              <div class="payment-info">
+                <span class="payment-name">Tarjeta débito/crédito</span>
+                <span class="payment-desc">Visa, Mastercard, Amex</span>
+              </div>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <!-- Resumen del pedido -->
+      <aside class="order-summary">
+        <h3>Resumen del pedido</h3>
+
+        <div class="order-items">
+          <div class="order-item" *ngFor="let item of items">
+            <div class="item-image">
+              <img *ngIf="item.image" [src]="item.image" [alt]="item.name">
+              <div *ngIf="!item.image" class="img-placeholder">👕</div>
+            </div>
+            <div class="item-details">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-variant">Talla: {{ item.size }} / Color: {{ item.color }}</span>
+              <span class="item-qty">x{{ item.quantity }}</span>
+            </div>
+            <span class="item-price">${{ item.price * item.quantity | number:'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="summary-totals">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>${{ total | number:'1.0-0' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Envío</span>
+            <span>{{ shippingCost === 0 ? 'Gratis' : ('$' + shippingCost | number:'1.0-0') }}</span>
+          </div>
+          <div class="summary-row free-shipping" *ngIf="shippingCost > 0">
+            <span>🎉 Envío gratis applies at ${{ 150000 - total | number:'1.0-0' }}</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>${{ grandTotal | number:'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <button class="btn-place-order" (click)="placeOrder()" [disabled]="!canPlaceOrder">
+          Realizar pedido
+        </button>
+
+        <p class="secure-note">🔒 Pago seguro. Tus datos están protegidos.</p>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- Order Complete -->
+<div class="order-complete" *ngIf="orderComplete">
+  <div class="complete-container">
+    <div class="success-icon">✓</div>
+    <h1>¡Pedido realizado!</h1>
+    <p class="order-number">Pedido #{{ orderNumber }}</p>
+    <p class="order-message">Gracias por tu compra. Recibirás un correo de confirmación pronto.</p>
+
+    <div class="order-details-box">
+      <div class="detail-row">
+        <span>Método de pago:</span>
+        <span>{{ getPaymentLabel() }}</span>
+      </div>
+      <div class="detail-row">
+        <span>Total:</span>
+        <span>${{ grandTotal | number:'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <div class="complete-actions">
+      <a routerLink="/products" class="btn-primary">Seguir comprando</a>
+      <a routerLink="/profile" class="btn-secondary">Ver mis pedidos</a>
+    </div>
+  </div>
+</div>

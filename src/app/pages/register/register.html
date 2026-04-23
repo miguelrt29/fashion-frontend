@@ -1,0 +1,91 @@
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <a routerLink="/" class="auth-logo">Fashion<span>Store</span></a>
+      <p>Únete a miles de personas que ya disfrutan de la mejor moda online.</p>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-container">
+      <h1>Crear cuenta</h1>
+      <p class="auth-subtitle">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+      <form (ngSubmit)="onSubmit()" novalidate>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input
+              type="text"
+              [(ngModel)]="firstName"
+              name="firstName"
+              placeholder="Tu nombre"
+              [class.input-error]="fieldErrors.firstName"/>
+            <span class="field-error" *ngIf="fieldErrors.firstName">{{ fieldErrors.firstName }}</span>
+          </div>
+          <div class="form-group">
+            <label>Apellido</label>
+            <input
+              type="text"
+              [(ngModel)]="lastName"
+              name="lastName"
+              placeholder="Tu apellido"
+              [class.input-error]="fieldErrors.lastName"/>
+            <span class="field-error" *ngIf="fieldErrors.lastName">{{ fieldErrors.lastName }}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="tu@email.com"
+            autocomplete="email"
+            [class.input-error]="fieldErrors.email"/>
+          <span class="field-error" *ngIf="fieldErrors.email">{{ fieldErrors.email }}</span>
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input
+            type="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Mínimo 8 caracteres, 1 mayúscula y 1 número"
+            autocomplete="new-password"
+            [class.input-error]="fieldErrors.password"/>
+          <span class="field-error" *ngIf="fieldErrors.password">{{ fieldErrors.password }}</span>
+        </div>
+
+        <div class="form-group">
+          <label>Confirmar contraseña</label>
+          <input
+            type="password"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            placeholder="Repite tu contraseña"
+            autocomplete="new-password"
+            [class.input-error]="fieldErrors.confirmPassword"/>
+          <span class="field-error" *ngIf="fieldErrors.confirmPassword">{{ fieldErrors.confirmPassword }}</span>
+        </div>
+
+        <div class="password-rules">
+          <span [class.valid]="password.length >= 8">✓ Mínimo 8 caracteres</span>
+          <span [class.valid]="password.match('[A-Z]')">✓ Una mayúscula</span>
+          <span [class.valid]="password.match('[0-9]')">✓ Un número</span>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
+        </button>
+
+        <p class="terms">Al registrarte aceptas nuestros <a href="#">Términos y condiciones</a> y <a href="#">Política de privacidad</a></p>
+      </form>
+    </div>
+  </div>
+</div>
