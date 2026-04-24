@@ -9,15 +9,32 @@ export class AiService {
 
   constructor(private http: HttpClient) {}
 
-  chat(message: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/chat`, { message });
+  chat(message: string, sessionId: string): Observable<{
+    reply: string;
+    shouldEscalate: boolean;
+    sessionId: string;
+  }> {
+    return this.http.post<{ reply: string; shouldEscalate: boolean; sessionId: string }>(
+      `${this.apiUrl}/chat`,
+      { message, sessionId }
+    );
   }
 
-  recommend(description: string, products: any[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/recommend`, { description, products });
+  getRecommendations(viewedProductIds: string[]): Observable<{
+    recommendations: { productId: string; score: number }[];
+  }> {
+    return this.http.post<{ recommendations: { productId: string; score: number }[] }>(
+      `${this.apiUrl}/recommendations`,
+      { viewedProductIds }
+    );
   }
 
-  searchByText(query: string, products: any[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/search`, { query, products });
+  visualSearch(imageBase64: string, textFilter?: string): Observable<{
+    results: { productId: string; score: number; imageUrl: string }[];
+  }> {
+    return this.http.post<{ results: { productId: string; score: number; imageUrl: string }[] }>(
+      `${this.apiUrl}/visual-search`,
+      { imageBase64, textFilter }
+    );
   }
 }

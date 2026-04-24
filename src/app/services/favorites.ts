@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth';
 
 export interface FavoriteItem {
   id: string;
@@ -19,15 +20,36 @@ export class FavoritesService {
   private favoritesSubject = new BehaviorSubject<FavoriteItem[]>([]);
   favorites$ = this.favoritesSubject.asObservable();
 
-  constructor(private http: HttpClient) {
-    this.loadFavorites();
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {
+    this.initFavorites();
+    
+    this.authService.user$.subscribe(user => {
+      if (user) {
+        this.loadFavorites();
+      } else {
+        this.favoritesSubject.next([]);
+      }
+    });
+  }
+
+  private initFavorites(): void {
+    if (this.authService.isLoggedIn()) {
+      this.loadFavorites();
+    }
   }
 
   private loadFavorites(): void {
-    this.getFavorites().subscribe({
-      next: (favs) => this.favoritesSubject.next(favs),
-      error: () => this.favoritesSubject.next([])
-    });
+    if (!this.authService.isLoggedIn()) {
+      this.favoritesSubject.next([]);
+      return;
+    }
+    
+    this.getFavorites().pipe(
+      catchError(() => of([] as FavoriteItem[]))
+    ).subscribe(favs => this.favoritesSubject.next(favs));
   }
 
   getFavorites(): Observable<FavoriteItem[]> {
@@ -54,13 +76,20 @@ export class FavoritesService {
     category?: string;
   }): Observable<FavoriteItem> {
     return this.http.post<FavoriteItem>(`${this.apiUrl}/add`, product).pipe(
-      tap(() => this.loadFavorites())
+      tap(() => this.loadFavorites()),
+      catchError(err => {
+        if (err.status === 409) {
+          return of({ ...product, id: '', createdAt: new Date() } as FavoriteItem);
+        }
+        throw err;
+      })
     );
   }
 
   removeFavorite(favoriteId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/remove/${favoriteId}`).pipe(
-      tap(() => this.loadFavorites())
+      tap(() => this.loadFavorites()),
+      catchError(() => of())
     );
   }
 

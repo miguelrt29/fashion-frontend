@@ -295,6 +295,7 @@ export class Checkout implements OnInit {
               window.location.href = payment.url;
               return;
             }
+            throw new Error('No se pudo crear la sesión de pago');
           } else {
             const payment = await this.paymentsService.createMercadoPagoPayment(
               order.id,
@@ -306,10 +307,13 @@ export class Checkout implements OnInit {
               window.location.href = payment.initPoint;
               return;
             }
+            throw new Error('No se pudo crear la preferencia de pago');
           }
         } catch (paymentError: any) {
           console.error('Payment error:', paymentError);
-          this.toastService.info('El pago se procesará contra entrega');
+          this.isProcessing = false;
+          this.toastService.error('Error al procesar el pago. Por favor intenta de nuevo o elige otro método de pago.');
+          return;
         }
       }
 

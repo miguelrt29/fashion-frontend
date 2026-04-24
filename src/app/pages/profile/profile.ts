@@ -43,8 +43,21 @@ export class Profile implements OnInit, OnDestroy {
     zip?: string;
     postalCode: string;
     country: string;
+    apartment?: string;
+    phone?: string;
     isDefault: boolean;
-  } = { label: '', street: '', city: '', state: '', postalCode: '', country: 'Colombia', isDefault: false };
+  } = { 
+    label: '', 
+    type: 'Casa',
+    street: '', 
+    city: '', 
+    state: '', 
+    zip: '', 
+    postalCode: '', 
+    country: 'Colombia',
+    phone: '',
+    isDefault: false 
+  };
 
   showPasswordModal = false;
   passwordData = { current: '', new: '', confirm: '' };
@@ -155,11 +168,14 @@ export class Profile implements OnInit, OnDestroy {
     this.editingAddress = null;
     this.editAddressData = {
       label: 'Nueva Dirección',
+      type: 'Casa',
       street: '',
       city: '',
       state: '',
+      zip: '',
       postalCode: '',
       country: 'Colombia',
+      phone: '',
       isDefault: this.addresses.length === 0
     };
   }
@@ -171,8 +187,21 @@ export class Profile implements OnInit, OnDestroy {
 
   saveAddress() {
     const addressId = typeof this.editingAddress === 'string' ? this.editingAddress : null;
+    
+    const addressData = {
+      label: this.editAddressData.label || this.editAddressData.type || 'Dirección',
+      street: this.editAddressData.street,
+      city: this.editAddressData.city,
+      state: this.editAddressData.state,
+      postalCode: this.editAddressData.postalCode || this.editAddressData.zip || '',
+      country: this.editAddressData.country,
+      apartment: this.editAddressData.apartment,
+      phone: this.editAddressData.phone,
+      isDefault: this.editAddressData.isDefault,
+    };
+
     if (addressId) {
-      this.usersService.updateAddress(addressId, this.editAddressData).subscribe({
+      this.usersService.updateAddress(addressId, addressData).subscribe({
         next: () => {
           this.loadAddresses();
           this.toastService.success('Dirección actualizada');
@@ -181,7 +210,7 @@ export class Profile implements OnInit, OnDestroy {
         error: () => this.toastService.error('Error al actualizar dirección')
       });
     } else {
-      this.usersService.addAddress(this.editAddressData).subscribe({
+      this.usersService.addAddress(addressData).subscribe({
         next: () => {
           this.loadAddresses();
           this.toastService.success('Dirección añadida');
@@ -194,7 +223,18 @@ export class Profile implements OnInit, OnDestroy {
 
   cancelEditAddress() {
     this.editingAddress = null;
-    this.editAddressData = { label: '', street: '', city: '', state: '', postalCode: '', country: 'Colombia', isDefault: false };
+    this.editAddressData = { 
+      label: '', 
+      type: 'Casa',
+      street: '', 
+      city: '', 
+      state: '', 
+      zip: '', 
+      postalCode: '', 
+      country: 'Colombia',
+      phone: '',
+      isDefault: false 
+    };
   }
 
   deleteAddress(addressId: string) {

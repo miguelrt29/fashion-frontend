@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../../services/auth';
 import { ToastService } from '../../services/toast';
 
 @Component({
@@ -17,7 +19,10 @@ export class ForgotPassword {
   submitted = false;
   loading = false;
 
-  constructor(private toastService: ToastService) {}
+  constructor(
+    private authService: AuthService,
+    private toastService: ToastService
+  ) {}
 
   onSubmit() {
     if (!this.email.trim()) {
@@ -27,10 +32,20 @@ export class ForgotPassword {
 
     this.loading = true;
     
-    setTimeout(() => {
-      this.loading = false;
-      this.submitted = true;
-      this.toastService.success('Te hemos enviado un enlace para restablecer tu contraseña');
-    }, 1500);
+    this.authService.forgotPassword(this.email.trim()).subscribe({
+      next: () => {
+        this.loading = false;
+        this.submitted = true;
+        this.toastService.success('Te hemos enviado un enlace para restablecer tu contraseña');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading = false;
+        if (err.status === 0) {
+          this.toastService.error('No se pudo conectar al servidor');
+        } else {
+          this.toastService.error(err.error?.message || 'Error al solicitar recuperación');
+        }
+      }
+    });
   }
 }

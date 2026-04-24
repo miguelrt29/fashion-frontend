@@ -26,12 +26,13 @@ export class Products implements OnInit {
   selectedMaxPrice = 1000000;
 
 categories = [
-    { name: 'CAMISETAS', slug: 'camisetas' },
-    { name: 'PANTALONES', slug: 'pantalones' },
-    { name: 'VESTIDOS', slug: 'vestidos' },
-    { name: 'CHAQUETAS', slug: 'chaquetas' },
-    { name: 'ZAPATOS', slug: 'zapatos' },
-    { name: 'ACCESORIOS', slug: 'accesorios' }
+    { name: 'Todos', slug: '' },
+    { name: 'Camisetas', slug: 'camisetas' },
+    { name: 'Pantalones', slug: 'pantalones' },
+    { name: 'Vestidos', slug: 'vestidos' },
+    { name: 'Chaquetas', slug: 'chaquetas' },
+    { name: 'Zapatos', slug: 'zapatos' },
+    { name: 'Accesorios', slug: 'accesorios' }
   ];
 
   searchHistory: string[] = [];

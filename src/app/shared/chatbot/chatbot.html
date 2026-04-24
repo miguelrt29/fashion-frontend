@@ -1,45 +1,168 @@
 <div class="chatbot">
-  <!-- Botón flotante -->
-  <button class="chat-toggle" (click)="toggleChat()">
-    <svg *ngIf="!isOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-    </svg>
-    <svg *ngIf="isOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-    </svg>
+  <!-- Botón flotante con notificación -->
+  <button class="chat-toggle" (click)="toggleChat()" [class.has-unread]="messages.length === 0">
+    <div class="toggle-icon" *ngIf="!isOpen">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+      </svg>
+    </div>
+    <div class="toggle-icon" *ngIf="isOpen">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </div>
+    <span class="pulse"></span>
   </button>
 
   <!-- Ventana del chat -->
-  <div class="chat-window" *ngIf="isOpen">
+  <div class="chat-window" [class.open]="isOpen">
+    <!-- Header -->
     <div class="chat-header">
-      <div class="chat-avatar">FS</div>
-      <div>
-        <h4>Asistente FashionStore</h4>
-        <span>En línea</span>
+      <div class="header-content">
+        <div class="avatar-wrapper">
+          <div class="avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <span class="status-dot"></span>
+        </div>
+        <div class="header-text">
+          <h4>FashionStore Asistente</h4>
+          <span>Aquí para ayudarte</span>
+        </div>
       </div>
-    </div>
-
-    <div class="chat-messages">
-      <div *ngFor="let msg of messages" class="message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
-        <p>{{ msg.text }}</p>
-      </div>
-      <div class="message bot" *ngIf="loading">
-        <p class="typing">Escribiendo...</p>
-      </div>
-    </div>
-
-    <div class="chat-input">
-      <input
-        type="text"
-        [(ngModel)]="message"
-        (keyup.enter)="sendMessage()"
-        placeholder="Escribe tu mensaje..."
-        [disabled]="loading"/>
-      <button (click)="sendMessage()" [disabled]="loading">
+      <button class="close-btn" (click)="toggleChat()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
+    </div>
+
+    <!-- Camera View -->
+    <div class="camera-view" *ngIf="showCamera">
+      <video #videoElement autoplay playsinline></video>
+      <div class="camera-controls">
+        <button class="camera-btn cancel" (click)="cancelCamera()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+        <button class="camera-btn capture" (click)="capturePhoto()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+            <circle cx="12" cy="12" r="6" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="camera-btn placeholder"></div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" #messagesContainer *ngIf="!showCamera">
+      <div class="messages-wrapper">
+        <!-- Quick Replies -->
+        <div class="quick-replies" *ngIf="messages.length === 1">
+          <p class="quick-label">Preguntas frecuentes:</p>
+          <div class="quick-buttons">
+            <button 
+              *ngFor="let q of quickReplies.slice(0, 4)" 
+              class="quick-btn"
+              (click)="sendQuickReply(q)">
+              <span class="quick-icon">{{ q.icon }}</span>
+              <span class="quick-text">{{ q.text }}</span>
+            </button>
+          </div>
+          <button class="view-more" (click)="showAllQuickReplies = true" *ngIf="!showAllQuickReplies">
+            Ver más opciones
+          </button>
+          <div class="quick-buttons more" *ngIf="showAllQuickReplies">
+            <button 
+              *ngFor="let q of quickReplies.slice(4)" 
+              class="quick-btn"
+              (click)="sendQuickReply(q)">
+              <span class="quick-icon">{{ q.icon }}</span>
+              <span class="quick-text">{{ q.text }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Message Bubbles -->
+        <div *ngFor="let msg of messages" class="message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
+          <div class="message-bubble" [class.escalate]="msg.isEscalate">
+            <img *ngIf="msg.image" [src]="msg.image" class="message-image" alt="Imagen">
+            <p>{{ msg.text }}</p>
+            <span class="message-time">{{ formatTime(msg.timestamp) }}</span>
+          </div>
+          <div class="escalate-banner" *ngIf="msg.isEscalate && msg.role === 'bot'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+            Un agente se pondrá en contacto contigo
+          </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="message bot" *ngIf="loading">
+          <div class="message-bubble loading">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Options Popup -->
+    <div class="image-options" *ngIf="showImageOptions && !showCamera">
+      <div class="image-options-header">
+        <span>Buscar por imagen</span>
+        <button (click)="showImageOptions = false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="image-options-body">
+        <button class="image-option-btn" (click)="triggerFileInput()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>Subir desde galería</span>
+        </button>
+        <button class="image-option-btn" (click)="triggerCamera()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span>Tomar foto</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input" *ngIf="!showCamera">
+      <input type="file" #fileInput accept="image/*" hidden (change)="onFileSelected($event)">
+      <div class="input-wrapper">
+        <button class="attach-btn" (click)="toggleImageOptions()" [class.active]="showImageOptions">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </button>
+        <input
+          type="text"
+          [(ngModel)]="message"
+          (keyup.enter)="sendMessage()"
+          placeholder="Escribe tu mensaje..."
+          [disabled]="loading"/>
+        <button class="send-btn" (click)="sendMessage()" [disabled]="!message.trim() || loading">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </div>
