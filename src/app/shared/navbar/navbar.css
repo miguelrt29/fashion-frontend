@@ -70,7 +70,16 @@
   text-decoration: none;
 }
 
-.cart-count {
+.favorites-btn {
+  position: relative;
+  color: #0a0a0a;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.cart-count,
+.favorites-count {
   position: absolute;
   top: -8px;
   right: -8px;

@@ -3,6 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { CartService } from '../../services/cart';
+import { FavoritesService } from '../../services/favorites';
 
 @Component({
   selector: 'app-navbar',
@@ -14,12 +15,14 @@ import { CartService } from '../../services/cart';
 export class Navbar implements OnInit {
   isLoggedIn = false;
   cartCount = 0;
+  favoritesCount = 0;
   menuOpen = false;
   user: any = null;
 
   constructor(
     private authService: AuthService,
-    private cartService: CartService
+    private cartService: CartService,
+    private favoritesService: FavoritesService
   ) {}
 
   ngOnInit() {
@@ -29,6 +32,9 @@ export class Navbar implements OnInit {
     });
     this.cartService.items$.subscribe(items => {
       this.cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+    });
+    this.favoritesService.favorites$.subscribe(() => {
+      this.favoritesCount = this.favoritesService.getCount();
     });
   }
 

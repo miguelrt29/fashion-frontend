@@ -24,8 +24,24 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'favorites',
+    loadComponent: () => import('./pages/favorites/favorites').then(m => m.Favorites),
+  },
+  {
+    path: 'tracking',
+    loadComponent: () => import('./pages/order-tracking/order-tracking').then(m => m.OrderTracking),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./pages/login/login').then(m => m.Login),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./pages/forgot-password/forgot-password').then(m => m.ForgotPassword),
+  },
+  {
+    path: 'order-confirmation',
+    loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmation),
   },
   {
     path: 'register',
@@ -37,7 +53,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: '404',
+    loadComponent: () => import('./pages/not-found/not-found').then(m => m.NotFound),
+  },
+  {
     path: '**',
-    redirectTo: '',
+    redirectTo: '404',
   },
 ];

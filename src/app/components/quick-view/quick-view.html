@@ -1,0 +1,89 @@
+<div class="quick-view-overlay" (click)="onBackdropClick($event)" *ngIf="visible && product">
+  <div class="quick-view-modal">
+    <button class="close-btn" (click)="onClose()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <div class="modal-content">
+      <div class="product-image">
+        <img [src]="product.images?.[0]" [alt]="product.name">
+        <span class="category-badge">{{ product.category }}</span>
+      </div>
+
+      <div class="product-details">
+        <span class="product-brand">{{ product.brand }}</span>
+        <h2>{{ product.name }}</h2>
+        
+        <div class="product-price">
+          <span class="price">${{ product.price | number:'1.0-0' }}</span>
+          <span class="discount" *ngIf="product.discount">-{{ product.discount }}%</span>
+        </div>
+
+        <div class="rating-preview" *ngIf="product.rating">
+          <div class="stars">
+            <span *ngFor="let i of [1,2,3,4,5]" [class.filled]="i <= product.rating">★</span>
+          </div>
+          <span class="rating-count">({{ product.reviewsCount || 0 }} reseñas)</span>
+        </div>
+
+        <p class="product-description">{{ product.description | slice:0:150 }}...</p>
+
+        <div class="option-group" *ngIf="product.sizes?.length">
+          <label>Talla <span class="required">*</span></label>
+          <div class="size-options">
+            <button
+              *ngFor="let size of product.sizes"
+              (click)="selectedSize = size"
+              [class.selected]="selectedSize === size">
+              {{ size }}
+            </button>
+          </div>
+        </div>
+
+        <div class="option-group" *ngIf="product.colors?.length">
+          <label>Color <span class="required">*</span></label>
+          <div class="color-options">
+            <button
+              *ngFor="let color of product.colors"
+              (click)="selectedColor = color"
+              [class.selected]="selectedColor === color">
+              {{ color }}
+            </button>
+          </div>
+        </div>
+
+        <div class="quantity-row">
+          <label>Cantidad</label>
+          <div class="quantity-selector">
+            <button (click)="decreaseQuantity()">−</button>
+            <span>{{ quantity }}</span>
+            <button (click)="increaseQuantity()">+</button>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-cart" (click)="addToCart()" [class.added]="added" [disabled]="added">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h13M10 19a1 1 0 100 2 1 1 0 000-2zm7 0a1 1 0 100 2 1 1 0 000-2z"/>
+            </svg>
+            {{ added ? 'Añadido' : 'Añadir al carrito' }}
+          </button>
+          <button class="btn-favorite" (click)="toggleFavorite()" [class.active]="isFavorite()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </button>
+        </div>
+
+        <a [routerLink]="['/products', product.id]" class="view-full-details" (click)="onClose()">
+          Ver todos los detalles
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

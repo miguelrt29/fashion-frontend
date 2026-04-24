@@ -44,22 +44,66 @@
       <!-- Resumen -->
       <div class="cart-summary">
         <h2>Resumen del pedido</h2>
+
+        <!-- Cupón -->
+        <div class="coupon-section" *ngIf="!appliedCoupon">
+          <div class="coupon-input-wrapper">
+            <input 
+              type="text" 
+              [(ngModel)]="couponCode" 
+              placeholder="Código de cupón"
+              [class.error]="couponError">
+            <button class="coupon-apply" (click)="applyCoupon()">Aplicar</button>
+          </div>
+          <p class="coupon-error" *ngIf="couponError">{{ couponError }}</p>
+          <div class="coupon-suggestions">
+            <p>Prueba con:</p>
+            <span class="coupon-tag" (click)="couponCode = 'DESCUENTO10'">DESCUENTO10</span>
+            <span class="coupon-tag" (click)="couponCode = 'BIENVENIDO20'">BIENVENIDO20</span>
+            <span class="coupon-tag" (click)="couponCode = 'FLASH50'">FLASH50</span>
+          </div>
+        </div>
+
+        <div class="coupon-applied" *ngIf="appliedCoupon">
+          <div class="coupon-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>{{ couponSuccess }}</span>
+          </div>
+          <button class="coupon-remove" (click)="removeCoupon()">✕</button>
+        </div>
+
         <div class="summary-row">
           <span>Subtotal</span>
-          <span>${{ total | number:'1.0-0' }}</span>
+          <span>${{ subtotal | number:'1.0-0' }}</span>
+        </div>
+        <div class="summary-row discount" *ngIf="discount > 0">
+          <span>Descuento</span>
+          <span>-${{ discount | number:'1.0-0' }}</span>
         </div>
         <div class="summary-row">
           <span>Envío</span>
-          <span>{{ total >= 150000 ? 'Gratis' : '$15.000' }}</span>
+          <span [class.free]="freeShipping">{{ freeShipping ? 'Gratis' : '$' + (shipping | number:'1.0-0') }}</span>
         </div>
+
+        <!-- Progreso envío gratis -->
+        <div class="free-shipping-progress" *ngIf="!freeShipping">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getProgressToFreeShipping()"></div>
+          </div>
+          <p>Te faltan <strong>${{ getAmountToFreeShipping() | number:'1.0-0' }}</strong> para envío gratis</p>
+        </div>
+        <div class="free-shipping-progress" *ngIf="freeShipping">
+          <p class="free-shipping-msg">🎉 ¡Tienes envío gratis!</p>
+        </div>
+
         <div class="summary-row total">
           <span>Total</span>
-          <span>${{ (total >= 150000 ? total : total + 15000) | number:'1.0-0' }}</span>
+          <span>${{ getTotal() | number:'1.0-0' }}</span>
         </div>
-        <div class="free-shipping" *ngIf="total < 150000">
-          <p>Te faltan ${{ (150000 - total) | number:'1.0-0' }} para envío gratis</p>
-        </div>
-        <a routerLink="/checkout" class="btn-checkout">Proceder al pago</a>
+
+        <button class="btn-checkout" (click)="goToCheckout()">Proceder al pago</button>
         <a routerLink="/products" class="btn-continue">Seguir comprando</a>
       </div>
     </div>

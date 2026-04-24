@@ -91,12 +91,21 @@
         <h3>MANTENTE AL DÍA</h3>
         <p>Suscríbete para recibir información sobre nuevas colecciones, ofertas exclusivas y contenido exclusivo.</p>
       </div>
-      <div class="newsletter-right">
+      <div class="newsletter-right" *ngIf="!newsletterSubmitted">
         <form (ngSubmit)="onNewsletter()" class="newsletter-form">
           <input type="email" [(ngModel)]="newsletterEmail" name="email" placeholder="Correo electrónico" required>
-          <button type="submit">SUSCRIBIRSE</button>
+          <button type="submit" [disabled]="newsletterLoading">
+            {{ newsletterLoading ? '...' : 'SUSCRIBIRSE' }}
+          </button>
         </form>
         <span class="newsletter-note">Al suscribirte, aceptas recibir comunicaciones comerciales. Puedes darte de baja en cualquier momento.</span>
+      </div>
+      <div class="newsletter-success" *ngIf="newsletterSubmitted">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h4>¡Listo!</h4>
+        <p>Te has suscrito con <strong>{{ newsletterEmail }}</strong>. Pronto recibirás las mejores ofertas.</p>
       </div>
     </div>
   </div>

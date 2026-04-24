@@ -533,3 +533,33 @@ img {
     padding: 16px 8px;
   }
 }
+
+.newsletter-success {
+  text-align: center;
+  padding: 24px;
+  background: #dcfce7;
+  border-radius: 12px;
+  width: 100%;
+}
+
+.newsletter-success svg {
+  color: #059669;
+  margin-bottom: 12px;
+}
+
+.newsletter-success h4 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #18181b;
+  margin-bottom: 8px;
+}
+
+.newsletter-success p {
+  font-size: 14px;
+  color: #52525b;
+  line-height: 1.6;
+}
+
+.newsletter-success strong {
+  color: #18181b;
+}

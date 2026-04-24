@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface CartItem {
   id: string;
+  productId: string;
   name: string;
   price: number;
   quantity: number;
@@ -11,43 +14,69 @@ export interface CartItem {
   image: string;
 }
 
+export type NewCartItem = Omit<CartItem, 'id'>;
+
+export interface CartTotal {
+  total: number;
+  items: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  private apiUrl = `${environment.apiUrl}/cart`;
   private itemsSubject = new BehaviorSubject<CartItem[]>([]);
   items$ = this.itemsSubject.asObservable();
 
-  constructor() {
-    const saved = localStorage.getItem('cart');
-    if (saved) this.itemsSubject.next(JSON.parse(saved));
+  constructor(private http: HttpClient) {
+    this.loadCart();
+  }
+
+  private loadCart(): void {
+    this.getCart().subscribe({
+      next: (items) => this.itemsSubject.next(items),
+      error: () => this.itemsSubject.next([])
+    });
+  }
+
+  getCart(): Observable<CartItem[]> {
+    return this.http.get<CartItem[]>(this.apiUrl);
   }
 
   getItems(): CartItem[] {
     return this.itemsSubject.value;
   }
 
-  addItem(item: CartItem) {
-    const items = this.getItems();
-    const existing = items.find(i => i.id === item.id && i.size === item.size && i.color === item.color);
-    if (existing) {
-      existing.quantity += item.quantity;
-    } else {
-      items.push(item);
-    }
-    this.save(items);
+  getCartTotal(): Observable<CartTotal> {
+    return this.http.get<CartTotal>(`${this.apiUrl}/total`);
   }
 
-  removeItem(id: string, size: string, color: string) {
-    const items = this.getItems().filter(
-      i => !(i.id === id && i.size === size && i.color === color)
+  addItem(item: NewCartItem): Observable<CartItem> {
+    return this.http.post<CartItem>(`${this.apiUrl}/add`, item).pipe(
+      tap(() => this.loadCart())
     );
-    this.save(items);
   }
 
-  updateQuantity(id: string, size: string, color: string, quantity: number) {
-    const items = this.getItems();
-    const item = items.find(i => i.id === id && i.size === size && i.color === color);
-    if (item) item.quantity = quantity;
-    this.save(items);
+  updateQuantity(itemId: string, quantity: number): Observable<CartItem> {
+    return this.http.put<CartItem>(`${this.apiUrl}/update/${itemId}`, { quantity }).pipe(
+      tap(() => this.loadCart())
+    );
+  }
+
+  removeItem(itemId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/remove/${itemId}`).pipe(
+      tap(() => this.loadCart())
+    );
+  }
+
+  clearCart(): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/clear`).pipe(
+      tap(() => this.itemsSubject.next([]))
+    );
+  }
+
+  clear(): void {
+    this.itemsSubject.next([]);
+    localStorage.removeItem('cart');
   }
 
   getTotal(): number {
@@ -56,14 +85,5 @@ export class CartService {
 
   getCount(): number {
     return this.getItems().reduce((sum, i) => sum + i.quantity, 0);
-  }
-
-  clear() {
-    this.save([]);
-  }
-
-  private save(items: CartItem[]) {
-    this.itemsSubject.next(items);
-    localStorage.setItem('cart', JSON.stringify(items));
   }
 }

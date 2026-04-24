@@ -14,8 +14,16 @@
 
     <!-- Acciones derecha -->
     <div class="navbar-actions">
+      <!-- Favoritos -->
+      <a routerLink="/favorites" class="favorites-btn" *ngIf="isLoggedIn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+        <span class="favorites-count" *ngIf="favoritesCount > 0">{{ favoritesCount }}</span>
+      </a>
+
       <!-- Carrito -->
-      <a routerLink="/cart" class="cart-btn">
+      <a routerLink="/cart" class="cart-btn" *ngIf="isLoggedIn">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h13M10 19a1 1 0 100 2 1 1 0 000-2zm7 0a1 1 0 100 2 1 1 0 000-2z"/>
         </svg>

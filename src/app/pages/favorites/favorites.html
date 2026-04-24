@@ -1,0 +1,46 @@
+<div class="favorites-page">
+  <div class="favorites-container">
+    <div class="breadcrumb">
+      <a routerLink="/">Inicio</a>
+      <span>/</span>
+      <span>Favoritos</span>
+    </div>
+
+    <div class="favorites-header">
+      <div>
+        <h1>Mis favoritos</h1>
+        <p *ngIf="favorites.length > 0">{{ favorites.length }} {{ favorites.length === 1 ? 'producto' : 'productos' }}</p>
+      </div>
+      <button *ngIf="favorites.length > 0" class="clear-all-btn" (click)="clearAll()">
+        Vaciar lista
+      </button>
+    </div>
+
+    <div class="favorites-content" *ngIf="favorites.length > 0">
+      <div class="favorites-grid">
+        <div class="favorite-card" *ngFor="let item of favorites">
+          <a [routerLink]="['/products', item.id]" class="favorite-image">
+            <img *ngIf="item.image" [src]="item.image" [alt]="item.name">
+            <div *ngIf="!item.image" class="image-placeholder">❤️</div>
+            <button class="remove-btn" (click)="$event.preventDefault(); removeFavorite(item.id)">✕</button>
+          </a>
+          <div class="favorite-info">
+            <span class="favorite-category">{{ item.category }}</span>
+            <a [routerLink]="['/products', item.id]" class="favorite-name">{{ item.name }}</a>
+            <span class="favorite-price">{{ formatPrice(item.price) }}</span>
+            <button class="add-to-cart-btn" (click)="addToCart(item)">
+              Añadir al carrito
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="favorites.length === 0">
+      <div class="empty-icon">♡</div>
+      <h3>No tienes productos favoritos</h3>
+      <p>Añade productos a tus favoritos para guardarlos para después</p>
+      <a routerLink="/products" class="btn-shop">Explorar productos</a>
+    </div>
+  </div>
+</div>

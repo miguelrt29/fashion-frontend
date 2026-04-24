@@ -1,0 +1,74 @@
+<div class="tracking-page">
+  <div class="tracking-container">
+    <div class="breadcrumb">
+      <a routerLink="/">Inicio</a>
+      <span>/</span>
+      <span>Seguimiento</span>
+    </div>
+
+    <h1>Seguimiento de pedido</h1>
+
+    <!-- Buscador -->
+    <div class="tracking-search">
+      <input
+        type="text"
+        [(ngModel)]="searchInput"
+        (keyup.enter)="searchOrder()"
+        placeholder="Ingresa tu número de pedido (ej: ORD-001)">
+      <button (click)="searchOrder()">Buscar</button>
+    </div>
+
+    <!-- Pedido encontrado -->
+    <div class="tracking-result" *ngIf="foundOrder">
+      <div class="order-header">
+        <div class="order-info">
+          <span class="order-id">Pedido #{{ foundOrder.id }}</span>
+          <span class="order-status">{{ foundOrder.statusLabel }}</span>
+        </div>
+        <div class="delivery-date">
+          <span class="label">Fecha estimada de entrega:</span>
+          <span class="date">{{ foundOrder.estimatedDelivery }}</span>
+        </div>
+      </div>
+
+      <!-- Línea de tiempo -->
+      <div class="tracking-timeline">
+        <div
+          class="timeline-step"
+          *ngFor="let step of foundOrder.steps; let last = last"
+          [class.completed]="step.completed"
+          [class.current]="step.current">
+          <div class="step-icon">
+            <span *ngIf="step.completed && !step.current">✓</span>
+            <span *ngIf="step.current" class="current-icon">◉</span>
+            <span *ngIf="!step.completed && !step.current" class="pending-icon">○</span>
+          </div>
+          <div class="step-content">
+            <span class="step-name">{{ step.name }}</span>
+            <span class="step-date" *ngIf="step.date">{{ step.date }}</span>
+            <span class="step-date pending" *ngIf="!step.date && !step.completed">Pendiente</span>
+          </div>
+          <div class="step-line" *ngIf="!last"></div>
+        </div>
+      </div>
+
+      <!-- Info de envío -->
+      <div class="shipping-info">
+        <h3>Dirección de envío</h3>
+        <p>{{ foundOrder.shipping.name }}</p>
+        <p>{{ foundOrder.shipping.street }}</p>
+        <p>{{ foundOrder.shipping.city }}</p>
+      </div>
+
+      <a routerLink="/profile" class="view-orders-link">Ver todos mis pedidos →</a>
+    </div>
+
+    <!-- No encontrado -->
+    <div class="not-found" *ngIf="notFound">
+      <div class="not-found-icon">📦</div>
+      <h3>Pedido no encontrado</h3>
+      <p>No encontramos un pedido con ese número. Verifica el número e intenta de nuevo.</p>
+      <a routerLink="/profile" class="view-orders-link">Ver mis pedidos →</a>
+    </div>
+  </div>
+</div>

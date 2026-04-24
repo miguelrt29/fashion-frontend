@@ -1,6 +1,5 @@
 <div class="checkout-page" *ngIf="!orderComplete">
   <div class="checkout-container">
-    <!-- Breadcrumb -->
     <div class="breadcrumb">
       <a routerLink="/">Inicio</a>
       <span>/</span>
@@ -12,16 +11,13 @@
     <h1>Finalizar compra</h1>
 
     <div class="checkout-content">
-      <!-- Formulario -->
       <div class="checkout-form">
-        <!-- Datos de envío -->
         <section class="form-section">
           <h2>
             <span class="section-number">1</span>
             Datos de envío
           </h2>
 
-          <!-- Dirección guardada -->
           <div class="saved-address" *ngIf="savedAddresses.length > 0">
             <label class="radio-option">
               <input type="radio" name="addressType" [value]="'saved'" [(ngModel)]="addressType" (change)="onAddressTypeChange()">
@@ -33,7 +29,6 @@
             </label>
           </div>
 
-          <!-- Selector de direcciones guardadas -->
           <div class="saved-address-list" *ngIf="addressType === 'saved' && savedAddresses.length > 0">
             <div class="address-option" *ngFor="let addr of savedAddresses; let i = index">
               <label>
@@ -47,46 +42,71 @@
             </div>
           </div>
 
-          <!-- Formulario nueva dirección -->
           <div class="new-address-form" *ngIf="addressType === 'new' || savedAddresses.length === 0">
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group" [class.has-error]="validationErrors.find(e => e.field === 'name')">
                 <label>Nombre completo</label>
-                <input type="text" [(ngModel)]="shipping.name" name="name" placeholder="Juan Pérez">
+                <input type="text" [(ngModel)]="shipping.name" name="name" placeholder="Juan Pérez" maxlength="100">
+                <span class="error-msg" *ngIf="validationErrors.find(e => e.field === 'name')">
+                  {{ validationErrors.find(e => e.field === 'name')?.message }}
+                </span>
               </div>
-              <div class="form-group">
+              <div class="form-group" [class.has-error]="validationErrors.find(e => e.field === 'email')">
+                <label>Correo electrónico</label>
+                <input type="email" [(ngModel)]="shipping.email" name="email" placeholder="tu@email.com" maxlength="100">
+                <span class="error-msg" *ngIf="validationErrors.find(e => e.field === 'email')">
+                  {{ validationErrors.find(e => e.field === 'email')?.message }}
+                </span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" [class.has-error]="validationErrors.find(e => e.field === 'phone')">
                 <label>Teléfono</label>
-                <input type="tel" [(ngModel)]="shipping.phone" name="phone" placeholder="3001234567">
+                <input type="tel" [(ngModel)]="shipping.phone" name="phone" placeholder="3001234567" maxlength="15">
+                <span class="error-msg" *ngIf="validationErrors.find(e => e.field === 'phone')">
+                  {{ validationErrors.find(e => e.field === 'phone')?.message }}
+                </span>
               </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" [class.has-error]="validationErrors.find(e => e.field === 'street')">
               <label>Dirección</label>
-              <input type="text" [(ngModel)]="shipping.street" name="street" placeholder="Calle 123 #45-67, Apartamento 301">
+              <input type="text" [(ngModel)]="shipping.street" name="street" placeholder="Calle 123 #45-67, Apartamento 301" maxlength="300">
+              <span class="error-msg" *ngIf="validationErrors.find(e => e.field === 'street')">
+                {{ validationErrors.find(e => e.field === 'street')?.message }}
+              </span>
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group" [class.has-error]="validationErrors.find(e => e.field === 'city')">
                 <label>Ciudad</label>
-                <input type="text" [(ngModel)]="shipping.city" name="city" placeholder="Bogotá">
+                <input type="text" [(ngModel)]="shipping.city" name="city" placeholder="Bogotá" maxlength="100">
+                <span class="error-msg" *ngIf="validationErrors.find(e => e.field === 'city')">
+                  {{ validationErrors.find(e => e.field === 'city')?.message }}
+                </span>
               </div>
-              <div class="form-group">
+              <div class="form-group" [class.has-error]="validationErrors.find(e => e.field === 'state')">
                 <label>Departamento</label>
-                <input type="text" [(ngModel)]="shipping.state" name="state" placeholder="Cundinamarca">
+                <input type="text" [(ngModel)]="shipping.state" name="state" placeholder="Cundinamarca" maxlength="100">
+                <span class="error-msg" *ngIf="validationErrors.find(e => e.field === 'state')">
+                  {{ validationErrors.find(e => e.field === 'state')?.message }}
+                </span>
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group" [class.has-error]="validationErrors.find(e => e.field === 'zip')">
                 <label>Código postal</label>
-                <input type="text" [(ngModel)]="shipping.zip" name="zip" placeholder="110111">
+                <input type="text" [(ngModel)]="shipping.zip" name="zip" placeholder="110111" maxlength="20">
+                <span class="error-msg" *ngIf="validationErrors.find(e => e.field === 'zip')">
+                  {{ validationErrors.find(e => e.field === 'zip')?.message }}
+                </span>
               </div>
               <div class="form-group">
                 <label>País</label>
-                <input type="text" [(ngModel)]="shipping.country" name="country" placeholder="Colombia" value="Colombia" disabled>
+                <input type="text" [(ngModel)]="shipping.country" name="country" placeholder="Colombia" disabled>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Método de pago -->
         <section class="form-section">
           <h2>
             <span class="section-number">2</span>
@@ -121,7 +141,6 @@
         </section>
       </div>
 
-      <!-- Resumen del pedido -->
       <aside class="order-summary">
         <h3>Resumen del pedido</h3>
 
@@ -158,17 +177,40 @@
           </div>
         </div>
 
-        <button class="btn-place-order" (click)="placeOrder()" [disabled]="!canPlaceOrder">
-          Realizar pedido
+        <div class="security-alert" *ngIf="securityError">
+          <span class="alert-icon">⚠</span>
+          <span class="alert-text">{{ securityError }}</span>
+        </div>
+
+        <div class="network-status" *ngIf="!isOnline">
+          <span class="status-icon">📡</span>
+          <span>Sin conexión - Tu pedido no se procesará</span>
+        </div>
+
+        <button class="btn-place-order" (click)="placeOrder()" [disabled]="!canPlaceOrder" [class.processing]="isProcessing">
+          <span *ngIf="!isProcessing">Realizar pedido</span>
+          <span *ngIf="isProcessing" class="processing-text">
+            <span class="spinner"></span>
+            Procesando...
+          </span>
         </button>
 
-        <p class="secure-note">🔒 Pago seguro. Tus datos están protegidos.</p>
+        <div class="status-message" *ngIf="getStatusMessage()">
+          <span>{{ getStatusMessage() }}</span>
+        </div>
+
+        <div class="security-badges">
+          <span class="badge">🔒 SSL Seguro</span>
+          <span class="badge">🛡️ Anti-fraude</span>
+          <span class="badge">✓ Datos encriptados</span>
+        </div>
+
+        <p class="secure-note">Tus datos están protegidos y nunca se comparten.</p>
       </aside>
     </div>
   </div>
 </div>
 
-<!-- Order Complete -->
 <div class="order-complete" *ngIf="orderComplete">
   <div class="complete-container">
     <div class="success-icon">✓</div>
@@ -179,17 +221,17 @@
     <div class="order-details-box">
       <div class="detail-row">
         <span>Método de pago:</span>
-        <span>{{ getPaymentLabel() }}</span>
+        <span>{{ getPaymentLabelComplete() }}</span>
       </div>
       <div class="detail-row">
         <span>Total:</span>
-        <span>${{ grandTotal | number:'1.0-0' }}</span>
+        <span>${{ completedTotal | number:'1.0-0' }}</span>
       </div>
     </div>
 
     <div class="complete-actions">
       <a routerLink="/products" class="btn-primary">Seguir comprando</a>
-      <a routerLink="/profile" class="btn-secondary">Ver mis pedidos</a>
+      <button class="btn-secondary" (click)="goToOrders()">Ver mis pedidos</button>
     </div>
   </div>
 </div>

@@ -8,15 +8,41 @@
   </div>
 
   <div class="detail-container">
-    <!-- Imagen -->
     <div class="detail-images">
-      <div class="main-image">
-        <img *ngIf="product.images?.[0]" [src]="product.images[0]" [alt]="product.name">
-        <div *ngIf="!product.images?.[0]" class="image-placeholder">👕</div>
+      <div class="image-gallery">
+        <div class="thumbnails" *ngIf="product.images?.length > 1">
+          <button
+            *ngFor="let img of product.images; let i = index"
+            (click)="setActiveImage(i)"
+            [class.active]="activeImageIndex === i">
+            <img [src]="img" [alt]="product.name">
+          </button>
+        </div>
+        <div class="main-image-container">
+          <div
+            class="main-image"
+            (click)="openFullscreenImage()">
+            <img *ngIf="product.images?.[activeImageIndex]" [src]="product.images[activeImageIndex]" [alt]="product.name">
+            <div *ngIf="!product.images?.[activeImageIndex]" class="image-placeholder">👕</div>
+            <div class="zoom-overlay">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+              </svg>
+              <span>Ampliar</span>
+            </div>
+          </div>
+        </div>
+        <div class="image-actions">
+          <button class="expand-btn" (click)="openFullscreenImage()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+            </svg>
+            Ampliar imagen
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Info -->
     <div class="detail-info">
       <span class="detail-category">{{ product.category }}</span>
       <h1>{{ product.name }}</h1>
@@ -27,11 +53,41 @@
         <span class="discount" *ngIf="product.discount > 0">-{{ product.discount }}%</span>
       </div>
 
-      <p class="detail-description">{{ product.description }}</p>
+      <div class="rating-overview" *ngIf="stats.total > 0">
+        <div class="rating-stats">
+          <span class="rating-number">{{ stats.average }}</span>
+          <div class="rating-stars">
+            <span *ngFor="let filled of getStars(stats.average)" [class.filled]="filled">★</span>
+          </div>
+          <span class="rating-count">{{ stats.total }} {{ stats.total === 1 ? 'reseña' : 'reseñas' }}</span>
+        </div>
+        <div class="rating-distribution">
+          <div class="rating-bar" *ngFor="let i of [0,1,2,3,4]; let idx = index">
+            <span class="bar-label">{{ getDistributionStars(idx) }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width]="getProgressWidth(getDistributionPercentage(idx))"></div>
+            </div>
+            <span class="bar-count">{{ getDistributionCount(idx) }}</span>
+          </div>
+        </div>
+        <div class="rating-badges">
+          <span class="badge" *ngIf="stats.verifiedReviews > 0">✓ {{ stats.verifiedReviews }} verificadas</span>
+          <span class="badge" *ngIf="stats.withPhotos > 0">📷 {{ stats.withPhotos }} con fotos</span>
+        </div>
+      </div>
 
-      <!-- Tallas -->
+      <p class="detail-description" [class.truncated]="!showFullDescription">
+        {{ product.description }}
+      </p>
+      <button class="show-more-btn" (click)="showFullDescription = !showFullDescription">
+        {{ showFullDescription ? 'Ver menos' : 'Ver más' }}
+      </button>
+
       <div class="option-group" *ngIf="product.sizes?.length">
-        <label>Talla — <span>{{ selectedSize }}</span></label>
+        <div class="option-header">
+          <label>Talla <span class="required">*</span></label>
+          <button class="size-guide-btn" (click)="openSizeGuide()">Guía de tallas</button>
+        </div>
         <div class="size-options">
           <button
             *ngFor="let size of product.sizes"
@@ -42,9 +98,8 @@
         </div>
       </div>
 
-      <!-- Colores -->
       <div class="option-group" *ngIf="product.colors?.length">
-        <label>Color — <span>{{ selectedColor }}</span></label>
+        <label>Color <span class="required">*</span></label>
         <div class="color-options">
           <button
             *ngFor="let color of product.colors"
@@ -55,27 +110,252 @@
         </div>
       </div>
 
-      <!-- Cantidad -->
       <div class="option-group">
         <label>Cantidad</label>
         <div class="quantity-selector">
-          <button (click)="decreaseQuantity()">−</button>
+          <button (click)="decreaseQuantity()" [disabled]="quantity <= 1">−</button>
           <span>{{ quantity }}</span>
-          <button (click)="increaseQuantity()">+</button>
+          <button (click)="increaseQuantity()" [disabled]="quantity >= product.stock">+</button>
         </div>
-        <span class="stock-info">{{ product.stock }} disponibles</span>
+        <span class="stock-info" *ngIf="product.stock > 0">
+          <span class="stock-dot"></span>
+          {{ product.stock }} en stock
+        </span>
       </div>
 
-      <!-- Botón -->
-      <button class="btn-add-cart" (click)="addToCart()" [class.added]="added">
-        {{ added ? '✓ Añadido al carrito' : 'Añadir al carrito' }}
+      <button class="btn-add-cart" (click)="addToCart()" [class.added]="added" [disabled]="added">
+        <span *ngIf="!added">Añadir al carrito</span>
+        <span *ngIf="added" class="added-content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Añadido
+        </span>
       </button>
 
-      <a routerLink="/cart" class="btn-buy-now">Comprar ahora</a>
+      <button class="btn-buy-now" (click)="buyNow()">
+        Comprar ahora
+      </button>
     </div>
+  </div>
+
+  <section class="related-section" *ngIf="relatedProducts.length > 0">
+    <div class="section-header">
+      <h2>Productos relacionados</h2>
+      <p>Descubre más opciones similares</p>
+    </div>
+    <div class="related-grid">
+      <article class="related-card" *ngFor="let related of relatedProducts">
+        <a [routerLink]="['/products', related.id]" class="related-image">
+          <img [src]="related.images?.[0] || related.thumbnail" [alt]="related.name">
+          <span class="related-badge">{{ related.category }}</span>
+        </a>
+        <div class="related-info">
+          <span class="related-brand">{{ related.brand }}</span>
+          <h3><a [routerLink]="['/products', related.id]">{{ related.name }}</a></h3>
+          <span class="related-price">${{ related.price | number:'1.0-0' }}</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="reviews-section">
+    <div class="reviews-header">
+      <div class="reviews-title">
+        <h2>Reseñas de clientes</h2>
+        <span class="reviews-count">{{ stats.total }} {{ stats.total === 1 ? 'reseña' : 'reseñas' }}</span>
+      </div>
+      
+      <div class="reviews-controls">
+        <select class="sort-select" [(ngModel)]="sortBy" (ngModelChange)="sortReviews(sortBy)">
+          <option value="recent">Más recientes</option>
+          <option value="helpful">Más útiles</option>
+          <option value="highest">Mayor calificación</option>
+          <option value="lowest">Menor calificación</option>
+        </select>
+        
+        <button class="write-review-btn" (click)="toggleReviewForm()" *ngIf="isLoggedIn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          {{ showReviewForm ? 'Cancelar' : 'Escribir reseña' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="review-form" *ngIf="showReviewForm">
+      <h3>Comparte tu experiencia</h3>
+      
+      <div class="form-section">
+        <label>Tu calificación *</label>
+        <div class="rating-input">
+          <button
+            *ngFor="let star of [1, 2, 3, 4, 5]"
+            (click)="setRating(star)"
+            [class.active]="star <= reviewForm.rating">
+            ★
+          </button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label>Título de tu reseña *</label>
+        <input type="text" [(ngModel)]="reviewForm.title" placeholder="Resumen de tu experiencia">
+      </div>
+
+      <div class="form-section">
+        <label>Tu reseña *</label>
+        <textarea
+          [(ngModel)]="reviewForm.comment"
+          placeholder="Cuéntales a otros compradores qué te gustó, qué no, y por qué lo recomendarías..."
+          rows="5"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-section">
+          <label>Lo positivo (separados por coma)</label>
+          <input type="text" [(ngModel)]="reviewForm.pros" placeholder="Ej: Calidad, Comodidad, Diseño">
+        </div>
+        <div class="form-section">
+          <label>Lo negativo (separados por coma)</label>
+          <input type="text" [(ngModel)]="reviewForm.cons" placeholder="Ej: Talla pequeña, Envío lento">
+        </div>
+      </div>
+
+      <button class="submit-review-btn" (click)="submitReview()">Publicar reseña</button>
+    </div>
+
+    <div class="reviews-list" *ngIf="reviews.length > 0">
+      <article class="review-card" *ngFor="let review of reviews">
+        <div class="review-header">
+          <div class="reviewer-info">
+            <div class="reviewer-avatar">{{ review.userAvatar }}</div>
+            <div class="reviewer-details">
+              <span class="reviewer-name">
+                {{ review.userName }}
+                <span class="verified-badge" *ngIf="review.verified">✓ Comprador verificado</span>
+              </span>
+              <span class="review-date">{{ review.date }}</span>
+            </div>
+          </div>
+          <div class="review-rating">
+            <span *ngFor="let filled of getStars(review.rating)" [class.filled]="filled">★</span>
+          </div>
+        </div>
+
+        <h4 class="review-title">{{ review.title }}</h4>
+        <p class="review-comment">{{ review.comment }}</p>
+
+        <div class="review-tags" *ngIf="(review.pros?.length || 0) || (review.cons?.length || 0)">
+          <div class="tag positive" *ngIf="review.pros?.length">
+            <span class="tag-icon">+</span>
+            <span>{{ review.pros?.join(', ') }}</span>
+          </div>
+          <div class="tag negative" *ngIf="review.cons?.length">
+            <span class="tag-icon">−</span>
+            <span>{{ review.cons?.join(', ') }}</span>
+          </div>
+        </div>
+
+        <div class="review-footer">
+          <button class="helpful-btn" (click)="markHelpful(review.id)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.903.405-.903.908 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+            </svg>
+            ¿Útil? ({{ review.helpful }})
+          </button>
+        </div>
+      </article>
+
+      <button class="load-more-btn" *ngIf="hasMoreReviews" (click)="loadMoreReviews()">
+        Cargar más reseñas
+      </button>
+    </div>
+
+    <div class="no-reviews" *ngIf="reviews.length === 0 && !showReviewForm">
+      <div class="no-reviews-icon">📝</div>
+      <h3>Sé el primero en opinar</h3>
+      <p>Este producto aún no tiene reseñas. ¡Comparte tu experiencia y ayuda a otros compradores!</p>
+      <button class="write-first-review-btn" (click)="toggleReviewForm()">Escribir la primera reseña</button>
+    </div>
+  </section>
+</div>
+
+<app-size-guide [visible]="showSizeGuide" (close)="closeSizeGuide()"></app-size-guide>
+
+<div class="fullscreen-overlay" *ngIf="showFullscreenImage" (click)="onBackdropClick($event)">
+  <div class="fullscreen-container">
+    <button class="fullscreen-close" (click)="closeFullscreenImage()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+    
+    <div class="fullscreen-thumbnails" *ngIf="product.images?.length > 1">
+      <button
+        *ngFor="let img of product.images; let i = index"
+        (click)="setActiveImage(i); $event.stopPropagation()"
+        [class.active]="activeImageIndex === i">
+        <img [src]="img" [alt]="product.name">
+      </button>
+    </div>
+    
+    <div class="fullscreen-image" (click)="toggleZoom($event)" (mousemove)="onZoomMove($event)">
+      <img 
+        [src]="product.images?.[activeImageIndex]" 
+        [alt]="product.name"
+        [style.transformOrigin]="zoomPosition.x + '%' + ' ' + zoomPosition.y + '%'"
+        [style.transform]="'scale(' + zoomLevel + ')'">
+      <div class="zoom-toggle-hint" *ngIf="!isZoomed">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+        </svg>
+        <span>Click para {{ isZoomed ? 'alejar' : 'acercar' }}</span>
+      </div>
+      <div class="zoom-exit-hint" *ngIf="isZoomed">
+        <span>Click para alejar</span>
+      </div>
+    </div>
+    
+    <button class="fullscreen-nav prev" *ngIf="product.images?.length > 1 && activeImageIndex > 0" (click)="setActiveImage(activeImageIndex - 1); $event.stopPropagation()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    
+    <button class="fullscreen-nav next" *ngIf="product.images?.length > 1 && activeImageIndex < product.images.length - 1" (click)="setActiveImage(activeImageIndex + 1); $event.stopPropagation()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
   </div>
 </div>
 
 <div class="loading-state" *ngIf="loading">
-  <p>Cargando producto...</p>
+  <div class="loading-container">
+    <div class="loading-images">
+      <div class="skeleton-main-image"></div>
+      <div class="skeleton-thumbnails">
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-thumb"></div>
+      </div>
+    </div>
+    <div class="loading-info">
+      <div class="skeleton-line category"></div>
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line brand"></div>
+      <div class="skeleton-line price"></div>
+      <div class="skeleton-line description"></div>
+      <div class="skeleton-line description short"></div>
+      <div class="skeleton-sizes">
+        <div class="skeleton-size"></div>
+        <div class="skeleton-size"></div>
+        <div class="skeleton-size"></div>
+        <div class="skeleton-size"></div>
+      </div>
+      <div class="skeleton-button"></div>
+      <div class="skeleton-button secondary"></div>
+    </div>
+  </div>
 </div>
