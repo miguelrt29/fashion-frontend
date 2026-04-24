@@ -263,13 +263,13 @@ export class Checkout implements OnInit {
         items: this.items.map(item => ({
           productId: item.productId || '',
           name: item.name,
-          price: item.price,
-          quantity: item.quantity,
+          price: Number(item.price),
+          quantity: Number(item.quantity),
           size: item.size,
           color: item.color,
           image: item.image
         })),
-        total: this.grandTotal,
+        total: Number(this.grandTotal),
         paymentMethod: this.paymentMethod === 'card' ? 'stripe' : 
                     this.paymentMethod === 'transfer' ? 'mercadopago' : 'cash',
         shippingAddress: sanitizedShipping
