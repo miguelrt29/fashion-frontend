@@ -61,10 +61,16 @@ export class FavoritesService {
   }
 
   getFavoritesCount(): Observable<{ count: number }> {
+    if (!this.authService.isLoggedIn()) {
+      return of({ count: 0 });
+    }
     return this.http.get<{ count: number }>(`${this.apiUrl}/count`);
   }
 
   checkIsFavorite(productId: string): Observable<{ isFavorite: boolean }> {
+    if (!this.authService.isLoggedIn()) {
+      return of({ isFavorite: false });
+    }
     return this.http.get<{ isFavorite: boolean }>(`${this.apiUrl}/check/${productId}`);
   }
 
@@ -75,6 +81,9 @@ export class FavoritesService {
     image?: string;
     category?: string;
   }): Observable<FavoriteItem> {
+    if (!this.authService.isLoggedIn()) {
+      return of({ ...product, id: '', createdAt: new Date() } as FavoriteItem);
+    }
     return this.http.post<FavoriteItem>(`${this.apiUrl}/add`, product).pipe(
       tap(() => this.loadFavorites()),
       catchError(err => {
@@ -87,6 +96,9 @@ export class FavoritesService {
   }
 
   removeFavorite(favoriteId: string): Observable<void> {
+    if (!this.authService.isLoggedIn()) {
+      return of();
+    }
     return this.http.delete<void>(`${this.apiUrl}/remove/${favoriteId}`).pipe(
       tap(() => this.loadFavorites()),
       catchError(() => of())

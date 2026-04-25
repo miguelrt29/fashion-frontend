@@ -1,9 +1,31 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { RouterLink, Router } from '@angular/router';
 import { AiService } from '../../services/ai';
+import { CartService, NewCartItem } from '../../services/cart';
+import { FavoritesService } from '../../services/favorites';
 import { ToastService } from '../../services/toast';
+
+interface ProductCard {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  gender: string;
+  images: string[];
+  sizes: string[];
+  colors: string[];
+  discount: number;
+}
+
+interface ChatResponse {
+  text: string;
+  products: ProductCard[];
+  shouldEscalate?: boolean;
+  sessionId: string;
+}
 
 interface Message {
   role: 'user' | 'bot';
@@ -11,22 +33,23 @@ interface Message {
   image?: string;
   timestamp: Date;
   isEscalate?: boolean;
+  products?: ProductCard[];
 }
 
 interface QuickReply {
   icon: string;
   text: string;
-  message: string;
+  label: string;
 }
 
 @Component({
   selector: 'app-chatbot',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './chatbot.html',
   styleUrl: './chatbot.css'
 })
-export class Chatbot {
+export class Chatbot implements OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
@@ -38,30 +61,35 @@ export class Chatbot {
   sessionId = this.generateSessionId();
   showImageOptions = false;
   showCamera = false;
-  showAllQuickReplies = false;
   capturedImage: string | null = null;
   isCameraActive = false;
+  pendingAddToCart: ProductCard | null = null;
+  showSizeSelector = false;
+  selectedSize = '';
+  selectedColor = '';
+  imagePreview = '';
 
   quickReplies: QuickReply[] = [
-    { icon: '📦', text: 'Rastrear pedido', message: '¿Cómo puedo rastrear mi pedido?' },
-    { icon: '↩️', text: 'Devoluciones', message: '¿Cuál es la política de devoluciones?' },
-    { icon: '🚚', text: 'Envíos', message: '¿Cuánto cuesta el envío?' },
-    { icon: '💳', text: 'Métodos de pago', message: '¿Qué métodos de pago aceptan?' },
-    { icon: '👗', text: 'Tallas', message: '¿Cómo elijo mi talla?' },
-    { icon: '🤖', text: 'Buscar por foto', message: 'Buscar productos similares a una foto' },
+    { icon: 'sale', text: 'ofertas', label: 'Ver ofertas' },
+    { icon: 'search', text: 'buscar', label: 'Buscar' },
+    { icon: 'package', text: 'pedidos', label: 'Mis pedidos' },
+    { icon: 'ruler', text: 'tallas', label: 'Guía tallas' },
   ];
 
   private stream: MediaStream | null = null;
 
   constructor(
     private aiService: AiService,
-    private toastService: ToastService
+    private cartService: CartService,
+    private favoritesService: FavoritesService,
+    private toastService: ToastService,
+    private router: Router
   ) {}
 
   toggleChat() {
     this.isOpen = !this.isOpen;
     if (this.isOpen && this.messages.length === 0) {
-      this.addBotMessage('¡Hola! 👋 Soy tu asistente virtual de FashionStore. Estoy aquí para ayudarte con cualquier duda que tengas.');
+      this.addBotMessage('Hola! Soy tu asistente de FashionStore. Como puedo ayudarte?');
     }
   }
 
@@ -79,23 +107,13 @@ export class Chatbot {
     this.scrollToBottom();
   }
 
-  addBotMessage(text: string, isEscalate = false) {
-    let cleanText = text;
-    if (isEscalate || text.startsWith('[ESCALAR]')) {
-      cleanText = text.replace('[ESCALAR]', '').trim();
-      this.messages.push({
-        role: 'bot',
-        text: cleanText,
-        timestamp: new Date(),
-        isEscalate: true
-      });
-    } else {
-      this.messages.push({
-        role: 'bot',
-        text: cleanText,
-        timestamp: new Date()
-      });
-    }
+  addBotMessage(text: string, options?: { isEscalate?: boolean; products?: ProductCard[] }) {
+    this.messages.push({
+      role: 'bot',
+      text,
+      timestamp: new Date(),
+      ...options
+    });
     this.scrollToBottom();
   }
 
@@ -107,44 +125,36 @@ export class Chatbot {
     this.loading = true;
 
     this.aiService.chat(text, this.sessionId).subscribe({
-      next: (res) => {
+      next: (res: ChatResponse) => {
         this.loading = false;
-        this.addBotMessage(res.reply, res.shouldEscalate);
+        if (res.products && res.products.length > 0) {
+          this.addBotMessage(res.text || 'Aqui tienes:', { products: res.products });
+        } else {
+          this.addBotMessage(res.text);
+        }
         if (res.shouldEscalate) {
-          this.toastService.info('Un agente humano se pondrá en contacto contigo pronto');
+          this.toastService.info('Un agente te contactara pronto');
         }
       },
-      error: (err: HttpErrorResponse) => {
+      error: () => {
         this.loading = false;
-        this.addBotMessage('Lo siento, estoy teniendo problemas para responder. ¿Podrías intentar de nuevo? 🙏');
+        this.addBotMessage('Lo siento, tube un problema. Intenta de nuevo?');
       }
     });
   }
 
-  sendQuickReply(quickReply: QuickReply) {
-    if (quickReply.message === 'Buscar productos similares a una foto') {
-      this.showImageOptions = true;
-      return;
+  onSendClick() {
+    if (this.capturedImage) {
+      this.searchByImage(this.capturedImage);
+      this.clearImage();
+    } else if (this.message.trim()) {
+      this.sendMessage();
     }
-    this.message = quickReply.message;
-    this.sendMessage();
-  }
-
-  toggleImageOptions() {
-    this.showImageOptions = !this.showImageOptions;
-  }
-
-  triggerFileInput() {
-    this.fileInput.nativeElement.click();
-  }
-
-  triggerCamera() {
-    this.showCamera = true;
-    setTimeout(() => this.startCamera(), 100);
   }
 
   async startCamera() {
     try {
+      this.showCamera = true;
       this.stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'environment' } 
       });
@@ -152,8 +162,8 @@ export class Chatbot {
         this.videoElement.nativeElement.srcObject = this.stream;
         this.isCameraActive = true;
       }
-    } catch (err) {
-      this.toastService.error('No se pudo acceder a la cámara');
+    } catch {
+      this.toastService.error('No se pudo acceder a la camara');
       this.showCamera = false;
     }
   }
@@ -167,20 +177,12 @@ export class Chatbot {
     canvas.getContext('2d')?.drawImage(this.videoElement.nativeElement, 0, 0);
     
     this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
+    this.imagePreview = this.capturedImage;
     this.stopCamera();
     this.showCamera = false;
-    this.showImageOptions = false;
-    
-    this.searchByImage(this.capturedImage);
   }
 
-  cancelCamera() {
-    this.stopCamera();
-    this.showCamera = false;
-    this.capturedImage = null;
-  }
-
-  private stopCamera() {
+  stopCamera() {
     if (this.stream) {
       this.stream.getTracks().forEach(track => track.stop());
       this.stream = null;
@@ -188,53 +190,160 @@ export class Chatbot {
     this.isCameraActive = false;
   }
 
-  onFileSelected(event: Event) {
+  sendQuick(text: string) {
+    this.message = text;
+    this.sendMessage();
+  }
+
+  clearImage() {
+    this.imagePreview = '';
+    this.capturedImage = null;
+  }
+
+  triggerImageUpload() {
+    const input = document.getElementById('imageInput') as HTMLInputElement;
+    if (input) input.click();
+  }
+
+  onImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
     
     const file = input.files[0];
     if (!file.type.startsWith('image/')) {
-      this.toastService.error('Por favor selecciona una imagen');
+      this.toastService.error('Selecciona una imagen');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const base64 = e.target?.result as string;
-      this.showImageOptions = false;
-      this.searchByImage(base64);
+      this.imagePreview = e.target?.result as string;
+      this.capturedImage = this.imagePreview;
     };
     reader.readAsDataURL(file);
     input.value = '';
   }
 
-  private searchByImage(base64: string) {
-    this.addUserMessage('Buscando productos similares...', base64);
+  addToCart(product: ProductCard) {
+    const cartItem: NewCartItem = {
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      size: product.sizes?.[0] || 'Unica',
+      color: product.colors?.[0] || 'Unico',
+      image: product.images?.[0] || ''
+    };
+
+    this.cartService.addItem(cartItem).subscribe({
+      next: () => {
+        this.toastService.success('Producto anadido al carrito');
+      },
+      error: () => {
+        this.toastService.error('Error al anadir');
+      }
+    });
+  }
+
+  viewProduct(id: string) {
+    this.isOpen = false;
+    this.router.navigate(['/products', id]);
+  }
+
+  addToFavorites(product: ProductCard) {
+    this.favoritesService.addFavorite({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0] || '',
+      category: product.category
+    }).subscribe({
+      next: () => {
+        this.toastService.success('Anadido a favoritos');
+      },
+      error: () => {
+        this.toastService.error('Error al anadir');
+      }
+    });
+  }
+
+  requestAddToCart(product: ProductCard) {
+    if (product.sizes && product.sizes.length > 1) {
+      this.pendingAddToCart = product;
+      this.showSizeSelector = true;
+    } else {
+      this.addToCart(product);
+    }
+  }
+
+  confirmAddToCart() {
+    if (this.pendingAddToCart && this.selectedSize) {
+      this.addToCart(this.pendingAddToCart);
+      this.cancelSizeSelector();
+    }
+  }
+
+  cancelSizeSelector() {
+    this.pendingAddToCart = null;
+    this.showSizeSelector = false;
+    this.selectedSize = '';
+    this.selectedColor = '';
+  }
+
+  addUserMessageWithProducts(text: string, image?: string) {
+    this.messages.push({
+      role: 'user',
+      text,
+      image,
+      timestamp: new Date()
+    });
+    this.scrollToBottom();
+  }
+
+  searchByImage(base64: string) {
+    this.addUserMessageWithProducts('Buscando...', base64);
     this.loading = true;
 
     this.aiService.visualSearch(base64).subscribe({
       next: (res) => {
         this.loading = false;
         if (res.results.length > 0) {
-          const resultCount = res.results.length;
-          this.addBotMessage(`Encontré ${resultCount} productos similares para ti. Los resultados más relevantes son:`);
+          const products = res.results.map(r => ({
+            id: r.productId,
+            name: r.name,
+            price: r.price,
+            category: r.category,
+            gender: '',
+            images: r.image ? [r.image] : [],
+            sizes: [],
+            colors: [],
+            discount: 0
+          }));
+          this.addBotMessage(res.message || 'Encontré estos productos:', { products });
         } else {
-          this.addBotMessage('No encontré productos similares a esa imagen. ¿Podrías intentar con otra foto?');
+          this.addBotMessage('No encontré productos similares.');
         }
       },
-      error: (err: HttpErrorResponse) => {
+      error: () => {
         this.loading = false;
-        this.addBotMessage('Lo siento, no pude procesar la imagen. ¿Podrías intentar de nuevo?');
+        this.addBotMessage('No pude procesar la imagen.');
       }
     });
   }
 
   private scrollToBottom() {
     setTimeout(() => {
-      if (this.messagesContainer?.nativeElement) {
-        this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-      }
-    }, 50);
+      const el = document.getElementById('chatMessages');
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 100);
+  }
+
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('es-CO', { 
+      style: 'currency', 
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(price);
   }
 
   formatTime(date: Date): string {
@@ -242,6 +351,8 @@ export class Chatbot {
   }
 
   ngOnDestroy() {
-    this.stopCamera();
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+    }
   }
 }

@@ -78,8 +78,8 @@ export class ProductDetail implements OnInit {
   loadProduct(id: string) {
     this.loading = true;
     
-    this.productsService.getOne(id).subscribe({
-      next: (product) => {
+    this.productsService.getOne(Number(id)).subscribe({
+      next: (product: any) => {
         if (product) {
           this.product = product;
           this.selectedSize = product.sizes?.[0] || '';

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductsService } from '../../services/products';
 import { ProductCard } from '../../shared/product-card/product-card';
@@ -18,6 +18,7 @@ export class Products implements OnInit {
   filteredProducts: any[] = [];
   loading = true;
   search = '';
+  selectedGender = '';
   selectedCategory = '';
 
   minPrice = 0;
@@ -25,14 +26,22 @@ export class Products implements OnInit {
   selectedMinPrice = 0;
   selectedMaxPrice = 1000000;
 
-categories = [
+  genders = [
     { name: 'Todos', slug: '' },
-    { name: 'Camisetas', slug: 'camisetas' },
-    { name: 'Pantalones', slug: 'pantalones' },
+    { name: 'Mujer', slug: 'mujer' },
+    { name: 'Hombre', slug: 'hombre' }
+  ];
+
+  categories = [
+    { name: 'Todos', slug: '' },
     { name: 'Vestidos', slug: 'vestidos' },
-    { name: 'Chaquetas', slug: 'chaquetas' },
+    { name: 'Pantalones', slug: 'pantalones' },
+    { name: 'Blusas', slug: 'blusas' },
     { name: 'Zapatos', slug: 'zapatos' },
-    { name: 'Accesorios', slug: 'accesorios' }
+    { name: 'Accesorios', slug: 'accesorios' },
+    { name: 'Camisetas', slug: 'camisetas' },
+    { name: 'Camisas', slug: 'camisas' },
+    { name: 'Chaquetas', slug: 'chaquetas' }
   ];
 
   searchHistory: string[] = [];
@@ -42,11 +51,13 @@ categories = [
   constructor(
     private productsService: ProductsService,
     private route: ActivatedRoute,
+    private router: Router,
     private searchHistoryService: SearchHistoryService
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
+      this.selectedGender = params['gender'] || '';
       this.selectedCategory = params['category'] || '';
       this.loadProducts();
     });
@@ -58,7 +69,7 @@ categories = [
 
   loadProducts() {
     this.loading = true;
-    this.productsService.getAll(this.selectedCategory, this.search).subscribe({
+    this.productsService.getAll(this.selectedGender, this.selectedCategory, this.search).subscribe({
       next: (products) => {
         this.products = products;
         this.applyFilters();
@@ -72,6 +83,23 @@ categories = [
     this.filteredProducts = this.products.filter(product => {
       const price = product.price;
       return price >= this.selectedMinPrice && price <= this.selectedMaxPrice;
+    });
+  }
+
+  selectGender(slug: string) {
+    this.selectedGender = slug;
+    this.selectedCategory = '';
+    this.router.navigate([], {
+      queryParams: { gender: slug || null, category: null },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  selectCategory(slug: string) {
+    this.selectedCategory = slug;
+    this.router.navigate([], {
+      queryParams: { category: slug || null },
+      queryParamsHandling: 'merge'
     });
   }
 
@@ -107,11 +135,6 @@ categories = [
     this.searchHistoryService.clearHistory();
   }
 
-  selectCategory(slug: string) {
-    this.selectedCategory = slug;
-    this.loadProducts();
-  }
-
   toggleFilters() {
     this.showFilters = !this.showFilters;
   }
@@ -124,5 +147,49 @@ categories = [
     this.selectedMinPrice = this.minPrice;
     this.selectedMaxPrice = this.maxPrice;
     this.applyFilters();
+  }
+
+  get visibleCategories() {
+    const allCats = [
+      { name: 'Todos', slug: '' },
+      { name: 'Vestidos', slug: 'vestidos' },
+      { name: 'Pantalones', slug: 'pantalones' },
+      { name: 'Blusas', slug: 'blusas' },
+      { name: 'Zapatos', slug: 'zapatos' },
+      { name: 'Accesorios', slug: 'accesorios' },
+      { name: 'Camisetas', slug: 'camisetas' },
+      { name: 'Camisas', slug: 'camisas' },
+      { name: 'Chaquetas', slug: 'chaquetas' }
+    ];
+    
+    if (this.selectedGender === 'hombre') {
+      return allCats.filter(c => c.slug === '' || !['vestidos', 'blusas'].includes(c.slug));
+    }
+    return allCats.filter(c => c.slug === '' || !['camisetas', 'camisas', 'chaquetas'].includes(c.slug));
+  }
+
+  getPageTitle(): string {
+    const gender = this.genders.find(g => g.slug === this.selectedGender);
+    const category = this.categories.find(c => c.slug === this.selectedCategory);
+
+    if (this.selectedGender && this.selectedCategory) {
+      return `${gender?.name} - ${category?.name}`;
+    } else if (this.selectedGender) {
+      return gender?.name === 'Todos' ? 'Todos los productos' : `${gender?.name}`;
+    } else if (this.selectedCategory) {
+      return category?.name === 'Todos' ? 'Todos los productos' : `${category?.name}`;
+    }
+    return 'Todos los productos';
+  }
+
+  resetAll() {
+    this.selectedGender = '';
+    this.selectedCategory = '';
+    this.search = '';
+    this.resetFilters();
+    this.router.navigate([], {
+      queryParams: { gender: null, category: null },
+      queryParamsHandling: 'merge'
+    });
   }
 }
