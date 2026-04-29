@@ -28,14 +28,11 @@ export class Favorites implements OnInit {
     });
   }
 
-  removeFavorite(productId: string) {
-    const fav = this.favorites.find(f => f.productId === productId);
-    if (fav) {
-      this.favoritesService.removeFavorite(fav.id).subscribe({
-        next: () => this.toastService.info('Eliminado de favoritos'),
-        error: () => this.toastService.error('Error al eliminar')
-      });
-    }
+  removeFavorite(favoriteId: string) {
+    this.favoritesService.removeFavorite(favoriteId).subscribe({
+      next: () => this.toastService.info('Eliminado de favoritos'),
+      error: () => this.toastService.error('Error al eliminar')
+    });
   }
 
   addToCart(item: FavoriteItem) {

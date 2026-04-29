@@ -19,14 +19,16 @@
     <div class="favorites-content" *ngIf="favorites.length > 0">
       <div class="favorites-grid">
         <div class="favorite-card" *ngFor="let item of favorites">
-          <a [routerLink]="['/products', item.id]" class="favorite-image">
-            <img *ngIf="item.image" [src]="item.image" [alt]="item.name">
-            <div *ngIf="!item.image" class="image-placeholder">❤️</div>
-            <button class="remove-btn" (click)="$event.preventDefault(); removeFavorite(item.id)">✕</button>
-          </a>
+          <div class="favorite-image">
+            <a [routerLink]="['/products', item.productId]">
+              <img *ngIf="item.image" [src]="item.image" [alt]="item.name">
+              <div *ngIf="!item.image" class="image-placeholder">❤️</div>
+            </a>
+            <button class="remove-btn" (click)="removeFavorite(item.id)">✕</button>
+          </div>
           <div class="favorite-info">
             <span class="favorite-category">{{ item.category }}</span>
-            <a [routerLink]="['/products', item.id]" class="favorite-name">{{ item.name }}</a>
+            <a [routerLink]="['/products', item.productId]" class="favorite-name">{{ item.name }}</a>
             <span class="favorite-price">{{ formatPrice(item.price) }}</span>
             <button class="add-to-cart-btn" (click)="addToCart(item)">
               Añadir al carrito

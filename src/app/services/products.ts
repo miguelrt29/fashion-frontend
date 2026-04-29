@@ -4,7 +4,7 @@ import { Observable, of, catchError, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -41,7 +41,7 @@ export class ProductsService {
     );
   }
 
-  getById(id: number): Observable<Product> {
+  getById(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
@@ -49,15 +49,15 @@ export class ProductsService {
     return this.http.post<Product>(this.apiUrl, data);
   }
 
-  update(id: number, data: Partial<Product>): Observable<Product> {
+  update(id: string, data: Partial<Product>): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/${id}`, data);
   }
 
-  delete(id: number): Observable<void> {
+  delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  getOne(id: number): Observable<Product | null> {
+  getOne(id: string): Observable<Product | null> {
     return this.http.get<Product>(`${this.apiUrl}/${id}`).pipe(
       timeout(this.timeoutMs),
       catchError((error) => {

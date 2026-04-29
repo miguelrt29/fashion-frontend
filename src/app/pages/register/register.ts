@@ -68,7 +68,7 @@ export class Register {
     }).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/login'], { queryParams: { registered: true } });
+        this.router.navigate(['/']);
       },
       error: (err) => {
         this.loading = false;

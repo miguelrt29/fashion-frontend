@@ -100,6 +100,8 @@ export class Checkout implements OnInit {
   loadUserData() {
     const user = this.authService.getUser();
     if (user) {
+      this.shipping.name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Usuario';
+      this.shipping.email = user.email || '';
       this.savedAddresses = this.getSavedAddresses();
       if (this.savedAddresses.length > 0) {
         this.addressType = 'saved';
@@ -163,8 +165,7 @@ export class Checkout implements OnInit {
       this.validationErrors.push({ field: 'name', message: 'El nombre es obligatorio' });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!this.shipping.email || !emailRegex.test(this.shipping.email)) {
+    if (this.shipping.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.shipping.email)) {
       this.validationErrors.push({ field: 'email', message: 'Correo electrónico inválido' });
     }
 
@@ -201,13 +202,12 @@ export class Checkout implements OnInit {
     }
 
     return !!(
-      this.shipping.name &&
-      this.shipping.email &&
-      this.shipping.phone &&
-      this.shipping.street &&
-      this.shipping.city &&
-      this.shipping.state &&
-      this.shipping.zip
+      this.shipping.name?.trim() &&
+      this.shipping.phone?.trim() &&
+      this.shipping.street?.trim() &&
+      this.shipping.city?.trim() &&
+      this.shipping.state?.trim() &&
+      this.shipping.zip?.trim()
     );
   }
 

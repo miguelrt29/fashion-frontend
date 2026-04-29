@@ -69,16 +69,18 @@ export class ProductDetail implements OnInit {
       this.isMobile = window.innerWidth < 768;
     });
 
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadProduct(id);
-    }
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.loadProduct(id);
+      }
+    });
   }
 
   loadProduct(id: string) {
     this.loading = true;
     
-    this.productsService.getOne(Number(id)).subscribe({
+     this.productsService.getOne(id).subscribe({
       next: (product: any) => {
         if (product) {
           this.product = product;
@@ -163,8 +165,23 @@ export class ProductDetail implements OnInit {
 
   loadReviews() {
     if (!this.product) return;
-    this.reviews = this.reviewsService.getReviewsForProduct(this.product.id, this.currentPage);
-    this.stats = this.reviewsService.getStatsForProduct(this.product.id);
+    this.reviewsService.getProductReviews(this.product.id).subscribe({
+      next: (reviews) => {
+        this.reviews = reviews.slice(0, this.currentPage * 10);
+      }
+    });
+    this.reviewsService.getProductRating(this.product.id).subscribe({
+      next: (stats) => {
+        this.stats = {
+          average: stats.average,
+          count: stats.count,
+          total: stats.count,
+          distribution: stats.distribution || [0, 0, 0, 0, 0],
+          verifiedReviews: 0,
+          withPhotos: 0
+        };
+      }
+    });
   }
 
   sortReviews(sort: ReviewSortOption) {
@@ -238,9 +255,12 @@ export class ProductDetail implements OnInit {
       size: this.selectedSize,
       color: this.selectedColor,
       image: this.product.images?.[0] || ''
+    }).subscribe({
+      next: () => this.router.navigate(['/checkout']),
+      error: () => {
+        this.toastService.error('Error al procesar la compra');
+      }
     });
-    
-    this.router.navigate(['/checkout']);
   }
 
   toggleReviewForm() {
@@ -271,22 +291,29 @@ export class ProductDetail implements OnInit {
     const pros = this.reviewForm.pros.split(',').map(p => p.trim()).filter(p => p);
     const cons = this.reviewForm.cons.split(',').map(c => c.trim()).filter(c => c);
 
+    const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Usuario' : 'Usuario';
+    
     this.reviewsService.addReview(
       this.product.id,
       this.reviewForm.rating,
       this.reviewForm.comment,
       this.reviewForm.title,
-      user?.firstName + ' ' + user?.lastName || 'Usuario',
+      userName,
       user?.id || 'guest',
       pros,
       cons,
       [],
       !!user
-    );
-
-    this.loadReviews();
-    this.toastService.success('Tu reseña ha sido publicada');
-    this.toggleReviewForm();
+    ).subscribe({
+      next: (review) => {
+        this.loadReviews();
+        this.toastService.success('Tu reseña ha sido publicada');
+        this.toggleReviewForm();
+      },
+      error: () => {
+        this.toastService.error('Error al publicar la reseña');
+      }
+    });
   }
 
   markHelpful(reviewId: string) {
