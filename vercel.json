@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/fashion-frontend",
+  "outputDirectory": "dist/fashion-frontend/browser",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
