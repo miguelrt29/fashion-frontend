@@ -146,6 +146,43 @@
   color: #0a0a0a;
 }
 
+.mobile-auth {
+  display: none;
+}
+
+.mobile-link {
+  text-decoration: none;
+  color: #525252;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.mobile-link:hover {
+  color: #0a0a0a;
+}
+
+.mobile-user {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0a0a0a;
+  opacity: 0.6;
+}
+
+.logout-btn {
+  color: #e63946;
+}
+
+.logout-btn:hover {
+  color: #c1121f;
+}
+
 @media (max-width: 768px) {
   .navbar-container {
     padding: 0 20px;
@@ -176,5 +213,10 @@
   .btn-outline,
   .user-name {
     display: none;
+  }
+
+  .mobile-auth {
+    display: list-item;
+    padding-top: 4px;
   }
 }

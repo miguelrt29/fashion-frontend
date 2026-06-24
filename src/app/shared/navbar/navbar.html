@@ -7,9 +7,13 @@
 
     <!-- Links centro -->
     <ul class="navbar-links" [class.open]="menuOpen">
-      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a></li>
-      <li><a routerLink="/products" routerLinkActive="active">Productos</a></li>
-      <li *ngIf="isLoggedIn"><a routerLink="/profile" routerLinkActive="active">Mi perfil</a></li>
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="menuOpen = false">Inicio</a></li>
+      <li><a routerLink="/products" routerLinkActive="active" (click)="menuOpen = false">Productos</a></li>
+      <li *ngIf="isLoggedIn"><a routerLink="/profile" routerLinkActive="active" (click)="menuOpen = false">Mi perfil</a></li>
+      <li class="mobile-auth" *ngIf="!isLoggedIn"><a routerLink="/login" (click)="menuOpen = false" class="mobile-link">Iniciar sesión</a></li>
+      <li class="mobile-auth" *ngIf="!isLoggedIn"><a routerLink="/register" (click)="menuOpen = false" class="mobile-link">Registrarse</a></li>
+      <li class="mobile-auth" *ngIf="isLoggedIn"><span class="mobile-user">Hola, {{ user?.firstName }}</span></li>
+      <li class="mobile-auth" *ngIf="isLoggedIn"><button (click)="logout(); menuOpen = false" class="mobile-link logout-btn">Salir</button></li>
     </ul>
 
     <!-- Acciones derecha -->
