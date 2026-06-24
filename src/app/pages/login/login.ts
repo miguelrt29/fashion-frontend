@@ -15,6 +15,7 @@ import { ToastService } from '../../services/toast';
 export class Login {
   email = '';
   password = '';
+  showPassword = false;
   loading = false;
   googleLoading = false;
   error = '';
